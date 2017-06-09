@@ -117,7 +117,7 @@ if __name__=="__main__":
         start_vector = np.array(find_derivative_multiple([x.p[0], y.p[0], z.p[0]], 0))
         data[segment_num][4:7] = start_vector / np.linalg.norm(start_vector)
         data[segment_num][7:10] = find_value([x.p[-1], y.p[-1], z.p[-1]], T[-1])
-        start_vector = np.array(find_derivative_multiple([x.p[-1], y.p[-1], z.p[-1]], wp_t[-1]))
+        start_vector = -1 * np.array(find_derivative_multiple([x.p[-1], y.p[-1], z.p[-1]], wp_t[-1]))
         data[segment_num][10:13] = start_vector / np.linalg.norm(start_vector)
 
         with open(HOME + '/data/tangents.csv', 'a', newline='') as tangent_file:
