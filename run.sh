@@ -25,5 +25,6 @@ echo 'image generated from text!'
 python src/image_to_waypoints.py
 echo 'done with image_to_waypoints.py'
 
+#python3 src/generation.py
 python3 src/generation.py
 echo 'done with generation.py'
