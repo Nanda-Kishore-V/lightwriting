@@ -64,7 +64,7 @@ for segment_num,input_data in enumerate(input_data_multiple):
     trajectory = snap.QrPath(x, y, z, psi, power=10.00, tilt=0.25, guess=5.00)
     T = trajectory.optimize()  # an array of segment time length
 
-    with open('output.csv', 'a', newline='') as csvfile:
+    with open(HOME + '/data/output.csv', 'a', newline='') as csvfile:
         spamwriter = csv.writer(csvfile)
         if segment_num == 0:
             temp_x = ["x^"+str(degree) for degree in range(8)]

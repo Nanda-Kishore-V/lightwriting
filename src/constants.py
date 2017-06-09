@@ -13,4 +13,5 @@ offset_list = [-1,0,1]
 directions = [(i,j) for i in offset_list for j in offset_list]
 directions.remove((0,0))
 
-SCALING_FACTOR = 0.05
+#SCALING_FACTOR = 0.05
+SCALING_FACTOR = 0.25
