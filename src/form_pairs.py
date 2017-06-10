@@ -1,3 +1,5 @@
+from __future__ import division
+
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -10,7 +12,7 @@ D_MAX = 100
 THETA_END = 360
 COST_SCALING = 10
 LINE_THETA_ZERO = ((0, 0, 2 * COST_SCALING), (0, D_MAX, 1.5 * COST_SCALING))
-LINE_THETA_END = ((THETA_END, 0, 0 * COST_SCALING), (THETA_END, D_MAX, 1 * COST_SCALING))
+LINE_THETA_END = ((THETA_END, 0, 1 * COST_SCALING), (THETA_END, D_MAX, 0 * COST_SCALING))
 
 def metric(start, end):
     point_start = start[1]
@@ -22,8 +24,8 @@ def metric(start, end):
     return cost(theta, d)
 
 def cost(theta, d):
-    print 'd, theta', d, theta
-    k = 20 * 1 / (D_MAX - 0.99 * d)
+    print 'theta, d', theta, d
+    k = 200
     point_zero = find_section_point(d/D_MAX, LINE_THETA_ZERO)
     point_end = find_section_point(d/D_MAX, LINE_THETA_END)
     a, b = find_coefficients(point_zero, point_end, k)
@@ -46,7 +48,6 @@ def find_coefficients(point1, point2, k):
     return x_offset, y_offset
 
 def distance(point1, point2):
-    #print 'points', point1, point2
     return np.linalg.norm(tuple(map(operator.sub, point2, point1)))
 
 def unit_vector(v):
@@ -80,6 +81,7 @@ def main():
     # form pairs now
     n_required_segments = 2
     point_initial = points[1]
+    point_initial[2] = tuple([-1 * x for x in point_initial[2]])
     m = -1
     for i, p in enumerate(points):
         if i == 1:
