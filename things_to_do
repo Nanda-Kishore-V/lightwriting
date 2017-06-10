@@ -1,0 +1,3 @@
+finish collision detection for trajectories
+check metric for pairing segments in letter 'k'
+add command to Makefile to set current directory as HOME in constants.py

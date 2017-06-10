@@ -1,5 +1,6 @@
 # env
-HOME = '/home/nanda/Documents/Intern/light_writing/'
+HOME = '/home/aditya/repos/light_writing/'
+#HOME = '/home/nanda/Documents/Intern/light_writing/'
 
 # debug
 VERBOSE_IMAGE = False
