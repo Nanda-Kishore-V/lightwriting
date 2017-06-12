@@ -1,6 +1,11 @@
+import os
+
 # env
-HOME = '/home/aditya/repos/light_writing/'
-#HOME = '/home/nanda/Documents/Intern/light_writing/'
+HOME = os.getcwd() 
+if '/src' == HOME[-4:]:
+    HOME = HOME[:-4]
+HOME = HOME + '/'
+print('home', HOME)
 
 # debug
 VERBOSE_IMAGE = False
