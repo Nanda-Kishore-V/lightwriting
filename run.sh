@@ -28,3 +28,6 @@ echo 'done with image_to_waypoints.py'
 #python3 src/generation.py
 python3 src/generation.py
 echo 'done with generation.py'
+
+python src/split_into_planes.py
+echo 'done splitting segements into different planes.'
