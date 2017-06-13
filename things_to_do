@@ -2,6 +2,7 @@ finish collision detection for trajectories - done
 write script to combine all segments into single segment using metric (check how metric decreases and decide a threshold - maybe use number of quadrotors)
 run generation.py for combined segments (optimize later to only recompute sub-segments which were reversed)
 put colliding segments into different planes
+scale down simulated lengths of segments (from maybe 30m) to < 0.4m
 
 finish by Friday - all s/w parts
 do by next week - simulation
