@@ -1,15 +1,15 @@
 import os
 
+# debug
+VERBOSE_IMAGE = False
+VERBOSE_TEXT = False
+
 # env
 HOME = os.getcwd() 
 if '/src' == HOME[-4:]:
     HOME = HOME[:-4]
 HOME = HOME + '/'
-print('home', HOME)
-
-# debug
-VERBOSE_IMAGE = False
-VERBOSE_TEXT = False
+if VERBOSE_TEXT: print('home: ', HOME)
 
 # standard constants
 BLACK = 0
