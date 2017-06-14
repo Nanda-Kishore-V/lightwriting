@@ -28,18 +28,12 @@ def main():
         for i, p in enumerate(s[1:]):
             consecutive_distances.append(np.linalg.norm(tuple(map(operator.sub, p, s[i]))))
         segment_lengths.append(sum(consecutive_distances))
-    print 'before decimate seg lengths'
-    for s in sorted(segment_lengths):
-        print int(s)
-
-    print 'after decimate'
-    for s in sorted(segment_lengths):
-        print int(s)
 
     limit = 0.1 * max(segment_lengths)
     segments = [decimate(s) for i, s in enumerate(segments) if segment_lengths[i] >= limit]
-    print 'after decimate'
-    print 'len of segments', len(segments)
+    if VERBOSE_TEXT:
+        print 'after decimate'
+        print 'len of segments', len(segments)
 
     segment_lengths = []
     for s in segments:
@@ -47,16 +41,17 @@ def main():
         for i, p in enumerate(s[1:]):
             consecutive_distances.append(np.linalg.norm(tuple(map(operator.sub, p, s[i]))))
         segment_lengths.append(sum(consecutive_distances))
-    print segment_lengths
+    if VERBOSE_TEXT: print segment_lengths
 
     limit = 0.1 * max(segment_lengths)
     segments = [s for i, s in enumerate(segments) if segment_lengths[i] >= limit]
-    print 'len of segments after removing small segments', len(segments)
+    if VERBOSE_TEXT: print 'len of segments after removing small segments', len(segments)
 
-    print 'after decimate seg lengths', segment_lengths
-    print 'segment lengths and # of points'
-    for i, s in enumerate(segments):
-        print i, segment_lengths[i], s
+    if VERBOSE_TEXT:
+        print 'after decimate seg lengths', segment_lengths
+        print 'segment lengths and # of points'
+        for i, s in enumerate(segments):
+            print i, segment_lengths[i], s
 
     for index,segment in enumerate(segments):
         image_segment = np.zeros((image.shape[0],image.shape[1]))

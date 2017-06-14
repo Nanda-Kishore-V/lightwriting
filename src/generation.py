@@ -146,12 +146,10 @@ if __name__=="__main__":
         vector_y.append(row[11])
 
     colour = ['r' if i%2 == 0 else 'b' for i in range(len(origin_x))]
-    xy_axis.annotate(str(0), xy=(origin_y[0], origin_x[0]), xytext=(origin_y[0] + 1, origin_x[0] + 1),
-            arrowprops=dict(facecolor='white', shrink=0.05))
-    xy_axis.annotate(str(1), xy=(origin_y[2], origin_x[2]), xytext=(origin_y[2] + 1, origin_x[2] + 1),
-            arrowprops=dict(facecolor='white', shrink=0.05))
-    xy_axis.annotate(str(2), xy=(origin_y[4], origin_x[4]), xytext=(origin_y[4] + 1, origin_x[4] + 1),
-            arrowprops=dict(facecolor='white', shrink=0.05))
+    for i in range(len(origin_x)):
+        if i%2 == 0:
+            xy_axis.annotate(str(int(i%2)), xy=(origin_y[int(i%2)], origin_x[int(i%2)]), xytext=(origin_y[int(i%2)] + 1, origin_x[int(i%2)] + 1),
+                arrowprops=dict(facecolor='white', shrink=0.05))
     xy_axis.quiver(origin_y, origin_x, vector_y, vector_x, color=colour)
     # plt.xlim(0,500)
     # plt.ylim(0,500)
