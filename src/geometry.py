@@ -1,11 +1,32 @@
 from __future__ import division
 
+from abc import ABCMeta, abstractmethod
 import numpy as np
 import operator
 import math
 import copy
+import json
 
-class Vector():
+class GeometricEntity():
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def __repr__(self):
+        pass
+
+    @abstractmethod
+    def to_dict():
+        pass
+
+    @abstractmethod
+    def from_dict():
+        pass
+
+class Vector(GeometricEntity):
     def __init__(self, coordinates_end, coordinates_start=None):
         '''coordinates_end: tuple
             coordinates_start: tuple or None'''
@@ -52,7 +73,7 @@ class Vector():
         angle = np.arccos(np.clip((dot_product_normalized), -1.0, 1.0))
         return math.degrees(angle)
 
-class Point():
+class Point(GeometricEntity):
     def __init__(self, coordinates, tangent_at_point=None):
         '''coordinates: tuple
             tangent_at_point: Vector'''
@@ -92,7 +113,7 @@ class Point():
         section_coordinates = (coordinates1 + ratio * coordinates2) / (1 + ratio)
         return Point(tuple(section_coordinates))
 
-class Segment():
+class Segment(GeometricEntity):
     def __init__(self, state, points):
         '''Boolean state tells whether segment is visible or not
             points is a list of 2 Point'''
@@ -120,7 +141,7 @@ class Segment():
     def reverse(self):
         self.points.reverse()
 
-class Path():
+class Path(GeometricEntity):
     def __init__(self, segments):
         self.segments = segments[:]
         self.length = sum([s.length for s in segments])
@@ -204,9 +225,6 @@ class MetricSurface():
         self.LINE_THETA_ZERO = (Point((0, 0, 2 * self.COST_SCALING)), Point((0, self.D_MAX, 1.5 * self.COST_SCALING)))
         self.LINE_THETA_END = (Point((self.THETA_END, 0, 1 * self.COST_SCALING)), Point((self.THETA_END, self.D_MAX, 0 * self.COST_SCALING)))
         self.curvature = 200 # curvature of hyperbolae which form the surface
-
-    def __repr__(self):
-        pass
 
     def metric(self, point_start, point_end):
         dist = Point.distance(point_start, point_end)
