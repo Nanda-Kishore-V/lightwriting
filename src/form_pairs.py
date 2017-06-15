@@ -6,11 +6,13 @@ import matplotlib.pyplot as plt
 import operator
 import math
 import copy
+import json
 
 from constants import HOME
 from geometry import Vector, Point, Segment, Path, Hyperbola, MetricSurface
 
-def form_pairs(filename_input, max_number_of_paths, filename_output=None):
+# need to implement input and output using JSON
+def form_pairs(filename_input, max_number_of_paths, filename_output):
     '''Input:
         filename_input: absolute path to file which contains segments to be combined
         max_number_of_paths: integer - generally number of quadcopters available
@@ -99,9 +101,14 @@ def form_pairs(filename_input, max_number_of_paths, filename_output=None):
         plt.ylim([0, 100])
         plt.show()
 
+    path_dicts = [Path.to_dict(p) for p in paths]
+    with open(filename_output, 'w') as f:
+        json.dump(path_dicts, f)
+
 def main():
-    filename = HOME + "data/tangents.csv"
-    form_pairs(filename, 2)
+    filename_input = HOME + 'data/tangents.csv'
+    filename_output = HOME + 'data/long_paths.json'
+    form_pairs(filename_input, 2, filename_output)
 
 if __name__ == "__main__":
     main()
