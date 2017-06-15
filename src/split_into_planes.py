@@ -2,11 +2,13 @@ import numpy as np
 import csv
 from pypoly import Polynomial
 import operator
+import matplotlib.pyplot as plt
 
 from sets import Set
 from constants import HOME
 
 epsilon = 5
+ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/scripts/"
 
 def second_largest(numbers):
     first, second = None, None
@@ -23,13 +25,15 @@ def distance(point1, point2):
 def return_location(segment, time):
     shift_times = [segment[i][1] for i in range(len(segment))]
     s = 0
-    for i in range(len(shift_times)):
-        s += shift_times[i]
+    for index, t in enumerate(shift_times):
+        s += t
         if s >= time:
+            s -= t
             break
-    Px = Polynomial(*segment[i][2:10])
-    Py = Polynomial(*segment[i][10:18])
-    Pz = Polynomial(*segment[i][18:26])
+    time -= s
+    Px = Polynomial(*segment[index][2:10])
+    Py = Polynomial(*segment[index][10:18])
+    Pz = Polynomial(*segment[index][18:26])
     return Px(time), Py(time), Pz(time)
 
 def promising(node, color, intersecting_pairs, color_of_segments):
@@ -56,7 +60,7 @@ def main():
     matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
 
     times = [sum(segment[i][1] for i in range(len(segment))) for segment in matrix]
-    dt = min(times)/100
+    dt = min(times)/100.0
     t = 0
     limit = second_largest(times)
 
@@ -80,11 +84,13 @@ def main():
     for node in range(len(matrix)):
         color_of_segments[node] = get_color(node, intersecting_pairs, color_of_segments)
     print color_of_segments
-    # for segment_1, segment_2 in intersecting_pairs:
-    #     if segment_1 in list_segments:
-    #         # TODO: Add segment_1 to some set
-    #     if segment_2 in list_segments:
-    #         # TODO: Add segment_2 to some set
+
+    for segment_num, segment in enumerate(matrix):
+        with open(ROS_WS + "/traj/trajectory" + str(segment_num) + ".csv", "w") as filename:
+            writer = csv.writer(filename)
+            writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
+            for piece in segment:
+                writer.writerow(np.concatenate([[i] for i in piece[1:]]))
 
 if __name__ == "__main__":
     main()
