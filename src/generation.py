@@ -78,7 +78,7 @@ if __name__=="__main__":
         x = snap.Trajectory1D(x_wp, der=DER)
         y = snap.Trajectory1D(y_wp, der=DER)
         z = snap.Trajectory1D(z_wp, der=DER)
-        psi = snap.Trajectory1D(psi_wp, der=2)
+        psi = snap.Trajectory1D(psi_wp, der=DER)
 
         xy_lines = []
 
@@ -92,7 +92,7 @@ if __name__=="__main__":
                 temp_x = ["x^"+str(degree) for degree in range(2*(DER+1))]
                 temp_y = ["y^"+str(degree) for degree in range(2*(DER+1))]
                 temp_z = ["z^"+str(degree) for degree in range(2*(DER+1))]
-                temp_yaw = ["yaw^"+str(degree) for degree in range(6)]
+                temp_yaw = ["yaw^"+str(degree) for degree in range(2*(DER+1))]
                 spamwriter.writerow(np.concatenate([[int(num_segments)],['duration'], temp_x, temp_y, temp_z, temp_yaw]))
             for i in range(wap_num-1):
                 spamwriter.writerow(np.concatenate([[int(segment_num)],[T[i]], x.p[i], y.p[i], z.p[i], psi.p[i]]))
@@ -148,7 +148,7 @@ if __name__=="__main__":
     colour = ['r' if i%2 == 0 else 'b' for i in range(len(origin_x))]
     for i in range(len(origin_x)):
         if i%2 == 0:
-            xy_axis.annotate(str(int(i%2)), xy=(origin_y[int(i%2)], origin_x[int(i%2)]), xytext=(origin_y[int(i%2)] + 1, origin_x[int(i%2)] + 1),
+            xy_axis.annotate(str(int(i/2)), xy=(origin_y[i], origin_x[i]), xytext=(origin_y[i] + 1, origin_x[i] + 1),
                 arrowprops=dict(facecolor='white', shrink=0.05))
     xy_axis.quiver(origin_y, origin_x, vector_y, vector_x, color=colour)
     # plt.xlim(0,500)
