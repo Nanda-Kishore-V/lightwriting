@@ -7,8 +7,11 @@ import matplotlib.pyplot as plt
 from sets import Set
 from constants import HOME
 
-epsilon = 5
-ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/scripts/"
+HEIGHT_OFFSET = 1
+X_OFFSET = 0.1
+FACTOR = 20
+EPSILON = 0.2 * FACTOR
+ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/"
 
 def second_largest(numbers):
     first, second = None, None
@@ -72,7 +75,7 @@ def main():
 
         combinations = [(i,j) for i in range(len(locations)) for j in range(len(locations)) if i < j]
         distances = [distance(locations[i], locations[j]) for i, j in combinations]
-        is_intersecting = map(lambda x : x < epsilon, distances)
+        is_intersecting = map(lambda x : x < EPSILON, distances)
         for index, elem in enumerate(is_intersecting):
             if elem:
                 intersecting_pairs.add(combinations[index])
@@ -85,12 +88,36 @@ def main():
         color_of_segments[node] = get_color(node, intersecting_pairs, color_of_segments)
     print color_of_segments
 
+    initialPositions = []
+    heights = []
     for segment_num, segment in enumerate(matrix):
-        with open(ROS_WS + "/traj/trajectory" + str(segment_num) + ".csv", "w") as filename:
+        # with open(ROS_WS + 'scripts/traj/plane{0}_quad{1}.csv'.format(color_of_segments[segment_num], segment_num), "w") as filename:
+        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(segment_num), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
+            initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10]/FACTOR, 0))
+            heights.append(segment[0][2]/FACTOR)
             for piece in segment:
-                writer.writerow(np.concatenate([[i] for i in piece[1:]]))
+                temp = piece[10:18].copy()
+                piece[18:26] = piece[2:10].copy()
+                piece[10:18] = temp
+                piece[2:10] = [0 for _ in range(8)]
+                writer.writerow(np.concatenate([[piece[1]], [(i/FACTOR) for i in piece[2:]]]))
+
+    print "InitialPositions: ",initialPositions
+    print "Heights: ",heights
+
+    channel = [100, 110, 120]
+    with open(ROS_WS + "launch/crazyflies.yaml", "w") as filename:
+        filename.write("crazyflies:\n")
+        for segment_num in range(len(matrix)):
+            filename.write(' - id: ' + str(segment_num) + '\n')
+            filename.write('   channel: {0}\n'.format(channel[segment_num%3]))
+            filename.write('   initialPosition: [{0}, {1}, {2}]\n'.format(*initialPositions[segment_num]))
+
+    with open(ROS_WS + "launch/heights.yaml", "w") as filename:
+        for segment_num in range(len(matrix)):
+            filename.write('{0}: {1}\n'.format(segment_num, heights[segment_num]))
 
 if __name__ == "__main__":
     main()
