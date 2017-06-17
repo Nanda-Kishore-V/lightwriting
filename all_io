@@ -1,0 +1,45 @@
+Make:
+	input: None
+
+	bash run.sh:
+		input: font and text
+
+		convert text to image
+
+		image_preprocessing:
+			input: data/images/temporary.bmp
+
+			output: data/images/black_text.bmp		
+
+		image_to_waypoints:
+			input: data/images/black_text.bmp
+
+			get_skeleton:
+				input: data/images/black_text.bmp
+
+				output: skeletonized image object
+
+			junction_segmnetation:
+				input: skeletonized image object
+
+				output: list of Segment objects
+
+			decimate:
+				input: list of points (points are tuples)
+
+				output: shorter list of points (points are tuples)
+
+			output: list of Segment objects
+
+		generation:
+			input: list of Segment objects
+
+			output: /data/output.csv (rows containing: segment_index, time, 0th to 7th power of x,y,z,yaw to form piecewise polynomial)
+				/data/tangents.csv (rows containing: time, start and end points (along with their corresponding vectors))
+
+		split_into_planes:
+			input: 
+
+		output: None
+
+	output: None

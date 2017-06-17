@@ -178,7 +178,6 @@ class Segment(GeometricEntity):
 class Path(GeometricEntity):
     def __init__(self, segments):
         self.segments = segments[:]
-        self.length = sum([s.length for s in segments])
 
     def __repr__(self):
         return 'Length: ' + str(self.length) + '\nSegments:\n' + str(self.segments) + '\n'
@@ -202,6 +201,9 @@ class Path(GeometricEntity):
             return None
         return Path([Segment.from_dict(s_dict) for s_dict in p_dict['segments']])
 
+    def length(self):
+        return sum([s.length() for s in self.segments])
+
     @staticmethod
     def join(p, q, joining_point_p, joining_point_q):
         ''' Joins Path p with Path q and returns a new path'''
@@ -209,7 +211,7 @@ class Path(GeometricEntity):
             p.reverse()
         if joining_point_q in q.segments[-1].points:
             q.reverse()
-        segments_combined = p.segments + [Segment(False, [joining_point_p, joining_point_p])] + q.segments
+        segments_combined = p.segments + [Segment([joining_point_p, joining_point_p], False)] + q.segments
         return Path(segments_combined)
 
     def reverse(self):
@@ -227,13 +229,14 @@ class Path(GeometricEntity):
             for end_point_index in [0, -1]:
                 points_end[path_index].append(path.segments[end_point_index].points[end_point_index])
 
-
         index_best_p = None
         index_best_q = None
-        metric_best = -1
+        #metric_best = -1
+        metric_best = float("-inf")
         for index_p in range(2):
             for index_q in range(2):
                 metric_curr = m.metric(points_end[0][index_p], points_end[1][index_q])
+                print('metric_curr', metric_curr)
                 if metric_curr > metric_best:
                     metric_best = metric_curr
                     index_best_p = index_p

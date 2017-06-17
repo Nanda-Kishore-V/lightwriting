@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -42,22 +43,23 @@ def form_pairs(filename_input, max_number_of_paths, filename_output):
 
         start = Point(temp_data['point1'], temp_data['tangent1'])
         end = Point(temp_data['point2'], temp_data['tangent2'])
-        s = Segment(True, [start, end])
+        s = Segment([start, end])
+        print('s', s)
         p = Path([s])
         paths.append(p)
 
     '''
-    print 'paths before sorting:'
+    print('paths before sorting:')
     for p in paths:
-        print p
+        print(p)
     '''
     paths.sort(key = lambda p: p.length)
     '''
-    print 'paths after sorting:'
+    print('paths after sorting:')
     for p in paths:
-        print p
+        print(p)
     
-    print '-' * 80
+    print('-' * 80)
     '''
 
     m = MetricSurface()
@@ -82,26 +84,27 @@ def form_pairs(filename_input, max_number_of_paths, filename_output):
         paths.sort(key = lambda p: p.length)
 
     '''
-    print 'paths after combining:'
+    print('paths after combining:')
     for p in paths:
-        print p
+        print(p)
     '''
 
     for i, p in enumerate(paths):
         x = []
         y = []
         for s in p.segments:
-            x.append(s.points[0].coordinates[0])
-            x.append(s.points[1].coordinates[0])
-            y.append(s.points[0].coordinates[1])
-            y.append(s.points[1].coordinates[1])
+            x.append(s.points[0].coords[0])
+            x.append(s.points[1].coords[0])
+            y.append(s.points[0].coords[1])
+            y.append(s.points[1].coords[1])
         plt.figure(i)
-        plt.scatter(x, y, c='r')
+        plt.scatter(y, x, c='r')
         plt.xlim([0, 100])
         plt.ylim([0, 100])
         plt.show()
 
     path_dicts = [Path.to_dict(p) for p in paths]
+    print(*path_dicts, sep='\n')
     with open(filename_output, 'w') as f:
         json.dump(path_dicts, f)
 
