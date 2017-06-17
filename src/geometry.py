@@ -27,36 +27,39 @@ class GeometricEntity():
         pass
 
 class Vector(GeometricEntity):
-    def __init__(self, coordinates_end, coordinates_start=None):
-        '''coordinates_end: tuple
-            coordinates_start: tuple or None'''
-        if coordinates_start is None:
-            self.coordinates = tuple(coordinates_end)
+    def __init__(self, coords_end, coords_start=None):
+        '''coords_end: tuple
+            coords_start: tuple or None'''
+        if coords_start is None:
+            self.coords = tuple(coords_end)
         else:
-            self.coordinates = tuple(map(operator.sub, coordinates_end, coordinates_start))
+            self.coords = tuple(map(operator.sub, coords_end, coords_start))
 
     def __repr__(self, end=''):
-        return 'Coord: ' + str(self.coordinates) + end
+        return 'Coord: ' + str(self.coords) + end
 
     @staticmethod
     def to_dict(v):
         '''Returns a dictionary representation of Vector v which is JSON serializable'''
         if v is None:
             return None
-        return {'coordinates': v.coordinates}
+        return {'coords': v.coords}
 
     @staticmethod
     def from_dict(v_dict):
         '''Returns a Vector v by converting the dictionary representation of Vector provided by v_dict'''
         if v_dict is None:
             return None
-        return Vector(v_dict['coordinates'])
+        coords = v_dict.get('coords')
+        if coords is None:
+            return None
+        return Vector(coords)
 
     def norm(self):
-        return np.linalg.norm(self.coordinates)
+        return np.linalg.norm(self.coords)
 
     def normalize(self):
-        self.coordinates /= self.norm()
+        self.coords /= self.norm()
 
     def unit(self):
         '''Returns a unit vector corresponding to self'''
@@ -67,79 +70,110 @@ class Vector(GeometricEntity):
     @staticmethod
     def angle_between(u, v):
         '''Returns interior angle (< 180 degree) formed by Vector u and Vector v'''
-        dot_product = np.dot(u.coordinates, v.coordinates)
+        dot_product = np.dot(u.coords, v.coords)
         dot_product_normalized = dot_product / (u.norm() * v.norm())
         # why are we clipping value?
         angle = np.arccos(np.clip((dot_product_normalized), -1.0, 1.0))
         return math.degrees(angle)
 
 class Point(GeometricEntity):
-    def __init__(self, coordinates, tangent_at_point=None):
-        '''coordinates: tuple
-            tangent_at_point: Vector'''
-        self.coordinates = tuple(coordinates)
-        self.tangent = tangent_at_point
+    def __init__(self, coords, tgt_at_point=None):
+        '''coords: tuple
+            tgt_at_point: Vector'''
+        self.coords = tuple(coords)
+        self.tgt = tgt_at_point
 
     def __repr__(self, end='', sep='\t'):
-        return 'Coord: ' + str(self.coordinates) + sep + 'Tgt: ' + str(self.tangent) + end
+        my_string = 'Coord: ' + str(self.coords)
+        if self.tgt is not None:
+            my_string += sep + 'Tgt: ' + str(self.tgt)
+        my_string += end
+        return my_string
 
     @staticmethod
     def to_dict(p):
         '''Returns a dictionary representation of Point p which is JSON serializable'''
         if p is None:
             return None
-        return {'coordinates': p.coordinates, 'tangent': Vector.to_dict(p.tangent)}
+        p_dict = {'coords': p.coords}
+        if p.tgt is not None:
+            p_dict['tgt'] = Vector.to_dict(p.tgt)
+        return p_dict
 
     @staticmethod
     def from_dict(p_dict):
         '''Returns a Point p by converting the dictionary representation of Point provided by p_dict'''
         if p_dict is None:
             return None
-        return Point(p_dict['coordinates'], Vector.from_dict(p_dict['tangent']))
+        coords = p_dict.get('coords')
+        if coords is None:
+            return None
+        tgt = p_dict.get('tgt')
+        return Point(coords, Vector.from_dict(tgt))
 
     @staticmethod
     def distance(p, q):
         '''Returns Euclidean distance between Point p and Point q'''
-        a = np.array(p.coordinates)
-        b = np.array(q.coordinates)
+        a = np.array(p.coords)
+        b = np.array(q.coords)
         return np.linalg.norm(a - b)
 
     @staticmethod
     def find_section_point(ratio, a, b):
         '''Returns the section point of line segment with end points as
             Point a and Point b using section ratio from a to b'''
-        coordinates1 = np.array(a.coordinates)
-        coordinates2 = np.array(b.coordinates)
-        section_coordinates = (coordinates1 + ratio * coordinates2) / (1 + ratio)
-        return Point(tuple(section_coordinates))
+        coords1 = np.array(a.coords)
+        coords2 = np.array(b.coords)
+        section_coords = (coords1 + ratio * coords2) / (1 + ratio)
+        return Point(tuple(section_coords))
+
+    @staticmethod
+    def distance_perpendicular_from_line(p, line_end_points):
+        '''Returns perpendicular distance between line passing through Points line_end_points and the Point p'''
+        x0, y0 = p.coords
+        x1, y1 = line_end_points[0].coords
+        x2, y2 = line_end_points[1].coords
+        distance = abs((y2 - y1) * x0  - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
+        return distance
+
 
 class Segment(GeometricEntity):
-    def __init__(self, state, points):
+    def __init__(self, points, state=True):
         '''Boolean state tells whether segment is visible or not
-            points is a list of 2 Point'''
+            points is a list of Points'''
         self.state = state
         self.points = points[:]
-        self.length = sum([Point.distance(p, points[i + 1]) for i, p in enumerate(points[:-1])])
 
     def __repr__(self, end='\n', sep='\t'):
-        return 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
+        return 'Length: ' + str(self.length()) + sep + 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
 
     @staticmethod
     def to_dict(s):
         '''Returns a dictionary representation of Segment s which is JSON serializable'''
         if s is None:
             return None
-        return {'state': s.state, 'points': [Point.to_dict(p) for p in s.points]}
+        s_dict = {'points': [Point.to_dict(p) for p in s.points]}
+        if s.state != True:
+            s_dict['state'] = s.state
+        return s_dict
 
     @staticmethod
     def from_dict(s_dict):
         '''Returns a Segment s by converting the dictionary representation of Segment provided by s_dict'''
         if s_dict is None:
             return None
-        return Segment(s_dict['state'], [Point.from_dict(p_dict) for p_dict in s_dict['points']])
+        point_dicts = s_dict.get('points')
+        if point_dicts is None:
+            return None
+        points = [Point.from_dict(p_dict) for p_dict in point_dicts]
+        state = s_dict.get('state', True)
+        return Segment(points, state)
 
     def reverse(self):
         self.points.reverse()
+
+    def length(self):
+        return sum([Point.distance(p, self.points[i + 1]) for i, p in enumerate(self.points[:-1])])
 
 class Path(GeometricEntity):
     def __init__(self, segments):
@@ -154,12 +188,17 @@ class Path(GeometricEntity):
         '''Returns a dictionary representation of Path p which is JSON serializable'''
         if p is None:
             return None
+        if p.segments is None:
+            return None
         return {'segments': [Segment.to_dict(s) for s in p.segments]}
 
     @staticmethod
     def from_dict(p_dict):
         '''Returns a Path p by converting the dictionary representation of Path provided by p_dict'''
         if p_dict is None:
+            return None
+        segments = p_dict.get('segments')
+        if segments is None:
             return None
         return Path([Segment.from_dict(s_dict) for s_dict in p_dict['segments']])
 
@@ -208,8 +247,8 @@ class Hyperbola():
         '''Finds the coefficients of a hyperbola of the form 
             (x - x_offset) * (y - y_offset) = curvature
             passing through Point p and Point q'''
-        x2, _, y2 = p.coordinates
-        x1, _, y1 = q.coordinates
+        x2, _, y2 = p.coords
+        x1, _, y1 = q.coords
         b = -1 * (y1 + y2)
         a = 1
         c = y1 * y2 + (curvature * (y1 - y2)) / (x1 - x2)
@@ -229,7 +268,7 @@ class MetricSurface():
     def metric(self, point_start, point_end):
         dist = Point.distance(point_start, point_end)
         # we want our vectors to be as antiparallel as possible
-        theta = 180 - Vector.angle_between(point_start.tangent, point_end.tangent)
+        theta = 180 - Vector.angle_between(point_start.tgt, point_end.tgt)
         
         ratio = dist / (self.D_MAX - dist)
         point_zero = Point.find_section_point(ratio, *self.LINE_THETA_ZERO)
