@@ -2,12 +2,14 @@ import cv2
 import numpy as np
 import operator
 import csv
+import json
 
 from skeletonization import get_skeleton
 from decimation import decimate
 from junction_segmentation import junction_segmentation
 from constants import *
 from debug import *
+from geometry import Point, Segment
 
 def main():
     image = cv2.imread(HOME + 'data/images/black_text.bmp',0)
@@ -22,55 +24,57 @@ def main():
     segments = junction_segmentation(image)
     print 'junction segmentation done'
 
-    segment_lengths = []
-    for s in segments:
-        consecutive_distances = []
-        for i, p in enumerate(s[1:]):
-            consecutive_distances.append(np.linalg.norm(tuple(map(operator.sub, p, s[i]))))
-        segment_lengths.append(sum(consecutive_distances))
-
-    limit = 0.1 * max(segment_lengths)
-    segments = [decimate(s) for i, s in enumerate(segments) if segment_lengths[i] >= limit]
+    limit = 0.1 * max([len(s.points) for s in segments])
+    segments = [Segment(decimate(s.points)) for s in segments if len(s.points) > limit]
     if VERBOSE_TEXT:
         print 'after decimate'
         print 'len of segments', len(segments)
 
-    segment_lengths = []
-    for s in segments:
-        consecutive_distances = []
-        for i, p in enumerate(s[1:]):
-            consecutive_distances.append(np.linalg.norm(tuple(map(operator.sub, p, s[i]))))
-        segment_lengths.append(sum(consecutive_distances))
-    if VERBOSE_TEXT: print segment_lengths
-
-    limit = 0.1 * max(segment_lengths)
-    segments = [s for i, s in enumerate(segments) if segment_lengths[i] >= limit]
+    limit = 0.1 * max([len(s.points) for s in segments])
+    segments = [s for s in segments if len(s.points) > limit]
     if VERBOSE_TEXT: print 'len of segments after removing small segments', len(segments)
 
     if VERBOSE_TEXT:
-        print 'after decimate seg lengths', segment_lengths
-        print 'segment lengths and # of points'
+        print 'after decimate'
+        print 'segments lengths and # of points'
         for i, s in enumerate(segments):
-            print i, segment_lengths[i], s
+            print i, len(s.points)
 
-    for index,segment in enumerate(segments):
-        image_segment = np.zeros((image.shape[0],image.shape[1]))
-        for p in segment:
-            image_segment[p] = WHITE
+    for index, segment in enumerate(segments):
+        image_segment = np.zeros(image.shape)
+        for segment in segments:
+            for point in segment.points:
+                image_segment[point.coords] = WHITE
         if VERBOSE_IMAGE:
             show_and_destroy('Image' + str(index), image_segment)
 
     if VERBOSE_IMAGE:
         cv2.destroyAllWindows()
 
-    segments = [s for s in segments if len(s) > 2]
+    segments = [s for s in segments if len(s.points) > 2]
+
+    '''
     with open(HOME + "data/waypoints.csv", 'wb') as myfile:
         wr = csv.writer(myfile)
         wr.writerow([str(len(segments)), "x", "y", "z", "yaw"])
         for segment_index, segment in enumerate(segments):
-            for point_index, point in enumerate(segment):
+            for point in segment.points:
                 wr.writerow([int(segment_index), SCALING_FACTOR * int(width - point[0]), SCALING_FACTOR * int(point[1]), SCALING_FACTOR * int(0), int(0)])
+    '''
 
+#    print('-' * 80)
+    scaled_segments = []
+    for s in segments:
+        points = []
+        for p in s.points:
+            new_point = (width - p.coords[0], p.coords[1], 0)
+            new_point = tuple([SCALING_FACTOR * x for x in new_point] + [0])
+            points.append(Point(new_point))
+        scaled_segments.append(Segment(points))
+
+    segment_dicts = [Segment.to_dict(s) for s in scaled_segments]
+    with open(HOME + 'data/waypoints.json', 'w') as f:
+        json.dump(segment_dicts, f)
 
 if __name__=="__main__":
     main()

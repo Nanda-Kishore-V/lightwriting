@@ -4,9 +4,11 @@ import numpy as np
 from pypoly import Polynomial
 import csv
 import operator
+import json
 
 import snap
 from constants import HOME
+from geometry import Segment
 
 DER = 3
 
@@ -38,12 +40,15 @@ if __name__=="__main__":
     xy_axis.set_ylabel('y [m]')
 
     # load data
-    f = open(HOME + "data/waypoints.csv", "r")
-    csv_reader = csv.reader(f)
-    first_line = next(csv_reader)
-    matrix = np.loadtxt(f, delimiter=",", skiprows=0)
+    with open(HOME + 'data/waypoints.json') as f:
+        segment_dicts = json.load(f)
+    segments = [Segment.from_dict(s_dict) for s_dict in segment_dicts]
+    n_segments = len(segments)
+    print(*segments, sep='\n')
+    matrix = [[index, p.coords[0], p.coords[1], 0, 0]for index, s in enumerate(segments) for p in s.points]
+    print(*matrix, sep='\n')
 
-    num_segments = int(first_line[0])
+    num_segments = int(n_segments)
 
     input_data_multiple = [[[], [], [], []] for x in range(num_segments)]
     curr_segment = 0
@@ -129,7 +134,7 @@ if __name__=="__main__":
                 end = ['end ' + i for i in axes]
                 e_vector = ['end vector ' + i for i in axes]
                 writer.writerow(np.concatenate([['time per segment'], start, s_vector, end, e_vector]))
-            # segment id, start point coordinates, start tangent coordinates, end point coordinates, end tangent coordinates
+            # segment id, start point coords, start tangent coords, end point coords, end tangent coords
             writer.writerow(data[segment_num])
 
 
