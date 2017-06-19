@@ -50,7 +50,7 @@ if __name__=="__main__":
 
     num_segments = int(n_segments)
 
-    input_data_multiple = [[[], [], [], []] for x in range(num_segments)]
+    input_data_multiple = [[[], [], [], []] for _ in range(num_segments)]
     curr_segment = 0
     for row in matrix:
         if row[0] != curr_segment:

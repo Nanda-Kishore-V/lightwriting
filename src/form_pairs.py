@@ -1,30 +1,34 @@
-from __future__ import division
-from __future__ import print_function
+from __future__ import (
+    division,
+    print_function,
+    )
+
+from mpl_toolkits.mplot3d import (
+        Axes3D,
+        )
 
 import numpy as np
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-import operator
-import math
-import copy
 import json
 
-from constants import HOME
-from geometry import Vector, Point, Segment, Path, Hyperbola, MetricSurface
+from constants import (
+    HOME
+    )
+from geometry import (
+    Vector,
+    Point,
+    Segment,
+    Path,
+    MetricSurface,
+    )
 
-# need to implement input and output using JSON
-def form_pairs(filename_input, max_number_of_paths, filename_output):
-    '''Input:
-        filename_input: absolute path to file which contains segments to be combined
-        max_number_of_paths: integer - generally number of quadcopters available
-        
-        Operation:
-        combines segments and writes resulting segments to filename_output
-        if filename_output is None, then results are written to filename_input
+def form_pairs(
+        filename_input,
+        filename_output=None,
+        max_time_per_segment=20,
+        max_pieces_per_segment=30,
+        ):
 
-        Output:
-        None
-    '''
     if filename_output is None:
         filename_output = filename_input
 

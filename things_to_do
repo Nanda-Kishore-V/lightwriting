@@ -1,8 +1,7 @@
-run generation.py for combined segments (optimize later to only recompute sub-segments which were reversed)
 scale down simulated lengths of segments (from maybe 30m) to < 0.4m
 for straight lines, use x(t) = x1 + t * (x2 - x1)/time if QP doesnt work.
-implement JSON storage for data
 add height offset to prevent quadrotors hitting the ground
+change output of generation.py to .json
 
 finish by Friday - all s/w parts
 do by next week - simulation
