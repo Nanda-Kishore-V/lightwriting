@@ -1,6 +1,7 @@
 all:
-	#bash run.sh -f "Calligraffiti" -t 'Happy'
-	bash run.sh -f "Ubuntu" -t 'k'
+	#bash run.sh -f "Calligraffiti" -t 'k'
+	#bash run.sh -f "Ubuntu" -t 'k'
+	bash run.sh -f "Ubuntu" -t 'USC'
 
 clean: clean_src clean_data
 
@@ -10,5 +11,6 @@ clean_src:
 
 clean_data:
 	rm -f data/*.csv
+	rm -f data/*.json
 	rm -f data/images/*
 	rm -f data/segments/*
