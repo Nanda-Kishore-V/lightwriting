@@ -1,8 +1,9 @@
-scale down simulated lengths of segments (from maybe 30m) to < 0.4m
+scale down simulated lengths of segments to < 0.4m
 for straight lines, use x(t) = x1 + t * (x2 - x1)/time if QP doesnt work.
 add height offset to prevent quadrotors hitting the ground
 change output of generation.py to .json
+Use homogeneous coordinates after position of camera is known.
+Limit Segment combination to time and number of pieces per segment.
 
-finish by Friday - all s/w parts
-do by next week - simulation
+finish by Friday - simulation and find camera
 last week - run demos on h/w
