@@ -11,7 +11,8 @@ HEIGHT_OFFSET = 1
 X_OFFSET = 0.1
 FACTOR = 20
 EPSILON = 0.2 * FACTOR
-ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/"
+#ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/"
+ROS_WS = '/home/aditya/repos/crazyswarm/ros_ws/src/crazyswarm/'
 
 def second_largest(numbers):
     first, second = None, None
