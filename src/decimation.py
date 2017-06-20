@@ -56,12 +56,6 @@ def decimate(
             if VERBOSE_IMAGE: Point.to_image(points_reduced)
         return decimate(points, epsilon=epsilon)
 
-    if len(points_reduced) == 2:
-        mid_point = Point.find_section_point(1, *points_reduced)
-        mid_point.coords = [int(x) for x in mid_point.coords]
-        points_reduced.insert(1, mid_point)
-        if VERBOSE_TEXT: print('len', len(points_reduced))
-
     return points_reduced
 
 if __name__ == '__main__':
