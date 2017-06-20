@@ -51,7 +51,7 @@ def main():
     if VERBOSE_IMAGE:
         cv2.destroyAllWindows()
 
-    segments = [s for s in segments if len(s.points) > 2]
+    # segments = [s for s in segments if len(s.points) > 2]
 
     '''
     with open(HOME + "data/waypoints.csv", 'wb') as myfile:

@@ -8,8 +8,8 @@ from sets import Set
 from constants import HOME
 
 HEIGHT_OFFSET = 1
-X_OFFSET = 0.1
-FACTOR = 20
+X_OFFSET = 0.2
+FACTOR = 50
 EPSILON = 0.2 * FACTOR
 ROS_WS = "/home/nanda/Documents/Intern/crazyswarm/ros_ws/src/crazyswarm/"
 
