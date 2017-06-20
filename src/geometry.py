@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 
 from abc import ABCMeta, abstractmethod
 import numpy as np
@@ -6,6 +6,10 @@ import operator
 import math
 import copy
 import json
+
+from constants import (
+    VERBOSE_TEXT,
+)
 
 class GeometricEntity():
     __metaclass__ = ABCMeta
@@ -136,13 +140,30 @@ class Point(GeometricEntity):
         distance = abs((y2 - y1) * x0  - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
         return distance
 
+    @staticmethod
+    def to_image(points, width=None, height=None):
+        x_coords = [p.coords[0] for p in points]
+        y_coords = [p.coords[1] for p in points]
+        width = max(x_coords)
+        height = max(y_coords)
+
+        image = np.zeros((width, height), dtype=np.uint8)
+        for p in points:
+            image[p.coords] = WHITE
+
+        show_and_destroy('points as image', image)
+
 
 class Segment(GeometricEntity):
-    def __init__(self, points, state=True):
+    def __init__(self, points, state=True, time=None):
         '''Boolean state tells whether segment is visible or not
             points is a list of Points'''
         self.state = state
         self.points = points[:]
+        if time is None:
+            self.time = 0
+        else:
+            self.time = time
 
     def __repr__(self, end='\n', sep='\t'):
         return 'Length: ' + str(self.length()) + sep + 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
@@ -176,8 +197,12 @@ class Segment(GeometricEntity):
         return sum([Point.distance(p, self.points[i + 1]) for i, p in enumerate(self.points[:-1])])
 
 class Path(GeometricEntity):
-    def __init__(self, segments):
+    def __init__(self, segments, time=None):
         self.segments = segments[:]
+        if time is None:
+            self.time = 0
+        else:
+            self.time = time
 
     def __repr__(self):
         return 'Length: ' + str(self.length) + '\nSegments:\n' + str(self.segments) + '\n'
@@ -236,7 +261,7 @@ class Path(GeometricEntity):
         for index_p in range(2):
             for index_q in range(2):
                 metric_curr = m.metric(points_end[0][index_p], points_end[1][index_q])
-                print('metric_curr', metric_curr)
+                if VERBOSE_TEXT: print('metric_curr', metric_curr)
                 if metric_curr > metric_best:
                     metric_best = metric_curr
                     index_best_p = index_p

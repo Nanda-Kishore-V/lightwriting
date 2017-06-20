@@ -7,7 +7,7 @@ clean: clean_src clean_data
 
 clean_src:
 	rm -f src/*.pyc
-	rm -f src/__pycache__/*
+	rm -r -f src/__pycache__/
 
 clean_data:
 	rm -f data/*.csv

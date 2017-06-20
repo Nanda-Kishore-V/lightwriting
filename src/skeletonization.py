@@ -4,8 +4,11 @@ from skimage.util import invert
 from skimage import img_as_ubyte
 import cv2
 
-from constants import HOME
-from debug import *
+from constants import (
+    HOME,
+    VERBOSE_TEXT,
+)
+from debug_cv2 import show_and_destroy
 
 def get_skeleton(image):
     threshold = threshold_mean(image)

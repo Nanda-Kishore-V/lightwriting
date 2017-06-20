@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 import numpy as np
 import csv
 from pypoly import Polynomial
@@ -5,13 +7,17 @@ import operator
 import matplotlib.pyplot as plt
 
 from sets import Set
-from constants import HOME
+from constants import (
+    HOME,
+    VERBOSE_TEXT,
+)
 
 HEIGHT_OFFSET = 1
 X_OFFSET = 0.2
 FACTOR = 50
 EPSILON = 0.2 * FACTOR
-ROS_WS = "/home/nanda/Documents/Intern/crazyswarm/ros_ws/src/crazyswarm/"
+#ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/"
+ROS_WS = '/home/aditya/repos/crazyswarm/ros_ws/src/crazyswarm/'
 
 def second_largest(numbers):
     first, second = None, None
@@ -52,7 +58,7 @@ def get_color(node, intersecting_pairs, color_of_segments):
     for color in range(len(color_of_segments)):
         if promising(node, color, intersecting_pairs, color_of_segments):
             return color
-    print "Something is wrong with the number of segments."
+    if VERBOSE_TEXT: print("Something is wrong with the number of segments.")
     return None
 
 def main():
@@ -80,13 +86,13 @@ def main():
             if elem:
                 intersecting_pairs.add(combinations[index])
         t += dt
-    print intersecting_pairs
+    if VERBOSE_TEXT: print(intersecting_pairs)
     color_of_segments = {}
     for i in range(len(matrix)):
         color_of_segments[i] = -1
     for node in range(len(matrix)):
         color_of_segments[node] = get_color(node, intersecting_pairs, color_of_segments)
-    print color_of_segments
+    if VERBOSE_TEXT: print(color_of_segments)
 
     initialPositions = []
     heights = []
@@ -104,8 +110,8 @@ def main():
                 piece[2:10] = [0 for _ in range(8)]
                 writer.writerow(np.concatenate([[piece[1]], [(i/FACTOR) for i in piece[2:]]]))
 
-    print "InitialPositions: ",initialPositions
-    print "Heights: ",heights
+    if VERBOSE_TEXT: print("InitialPositions: " + str(initialPositions))
+    if VERBOSE_TEXT: print("Heights: " + str(heights))
 
     channel = [100, 110, 120]
     with open(ROS_WS + "launch/crazyflies.yaml", "w") as filename:

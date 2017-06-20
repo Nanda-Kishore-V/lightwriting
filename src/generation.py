@@ -1,14 +1,20 @@
+from __future__ import division, print_function
+
 from matplotlib.lines import Line2D
+from pypoly import Polynomial
 import matplotlib.pyplot as plt
 import numpy as np
-from pypoly import Polynomial
 import csv
-import operator
 import json
 
+from constants import (
+    HOME,
+    VERBOSE_TEXT,
+)
+from geometry import (
+    Segment,
+)
 import snap
-from constants import HOME
-from geometry import Segment
 
 DER = 3
 MAX_VELOCITY = 3
@@ -47,13 +53,14 @@ if __name__=="__main__":
         segment_dicts = json.load(f)
     segments = [Segment.from_dict(s_dict) for s_dict in segment_dicts]
     n_segments = len(segments)
-    print(*segments, sep='\n')
     matrix = [[index, p.coords[0], p.coords[1], 0, 0]for index, s in enumerate(segments) for p in s.points]
-    print(*matrix, sep='\n')
+    if VERBOSE_TEXT:
+        print(*segments, sep='\n')
+        print(*matrix, sep='\n')
 
     num_segments = int(n_segments)
 
-    input_data_multiple = [[[], [], [], []] for x in range(num_segments)]
+    input_data_multiple = [[[], [], [], []] for _ in range(num_segments)]
     curr_segment = 0
     for row in matrix:
         if row[0] != curr_segment:

@@ -1,14 +1,19 @@
+from __future__ import division, print_function
+
 import cv2
 import numpy as np
-import operator
-import csv
 import json
 
 from skeletonization import get_skeleton
 from decimation import decimate
 from junction_segmentation import junction_segmentation
-from constants import *
-from debug import *
+from constants import (
+    HOME,
+    WHITE,
+    SCALING_FACTOR,
+    VERBOSE_TEXT,
+    VERBOSE_IMAGE,
+)
 from geometry import Point, Segment
 
 def main():
@@ -19,26 +24,26 @@ def main():
         show_and_destroy('Original Image', image)
 
     image = get_skeleton(image)
-    print 'skeletonization done'
+    print('skeletonization done')
 
     segments = junction_segmentation(image)
-    print 'junction segmentation done'
+    print('junction segmentation done')
 
     limit = 0.1 * max([len(s.points) for s in segments])
     segments = [Segment(decimate(s.points)) for s in segments if len(s.points) > limit]
     if VERBOSE_TEXT:
-        print 'after decimate'
-        print 'len of segments', len(segments)
+        print('after decimate')
+        print('len of segments ' + str(len(segments)))
 
     limit = 0.1 * max([len(s.points) for s in segments])
     segments = [s for s in segments if len(s.points) > limit]
-    if VERBOSE_TEXT: print 'len of segments after removing small segments', len(segments)
+    if VERBOSE_TEXT: print('len of segments after removing small segments ' + str(len(segments)))
 
     if VERBOSE_TEXT:
-        print 'after decimate'
-        print 'segments lengths and # of points'
+        print('after decimate')
+        print('segments lengths and # of points')
         for i, s in enumerate(segments):
-            print i, len(s.points)
+            print('{}: {}'.format(i, len(s.points)))
 
     for index, segment in enumerate(segments):
         image_segment = np.zeros(image.shape)
@@ -53,16 +58,6 @@ def main():
 
     # segments = [s for s in segments if len(s.points) > 2]
 
-    '''
-    with open(HOME + "data/waypoints.csv", 'wb') as myfile:
-        wr = csv.writer(myfile)
-        wr.writerow([str(len(segments)), "x", "y", "z", "yaw"])
-        for segment_index, segment in enumerate(segments):
-            for point in segment.points:
-                wr.writerow([int(segment_index), SCALING_FACTOR * int(width - point[0]), SCALING_FACTOR * int(point[1]), SCALING_FACTOR * int(0), int(0)])
-    '''
-
-#    print('-' * 80)
     scaled_segments = []
     for s in segments:
         points = []
