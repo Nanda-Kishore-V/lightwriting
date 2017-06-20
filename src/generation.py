@@ -76,8 +76,7 @@ if __name__=="__main__":
     for segment_num,input_data in enumerate(input_data_multiple):
         print(segment_num, " is being optimized.")
         wap_num = len(input_data[0])
-        print("wap_num {0}".format(wap_num))
-
+        
         xy_axis.plot(input_data[1], input_data[0], 'ro')
         xy_lines = []
 

@@ -4,20 +4,26 @@ import numpy as np
 import csv
 from pypoly import Polynomial
 import operator
+import json
 import matplotlib.pyplot as plt
 
 from sets import Set
 from constants import (
     HOME,
     VERBOSE_TEXT,
+    HEIGHT_OFFSET,
+    X_OFFSET,
+    POST_SCALING_FACTOR,
+    COLLISION_DIST,
 )
 
-HEIGHT_OFFSET = 1
-X_OFFSET = 0.2
-FACTOR = 50
-EPSILON = 0.2 * FACTOR
-#ROS_WS = "/home/nanda/Documents/Intern/crazyflie/crazyswarm/ros_ws/src/crazyswarm/"
-ROS_WS = '/home/aditya/repos/crazyswarm/ros_ws/src/crazyswarm/'
+from geometry import (
+    Segment,
+    Point,
+)
+
+ROS_WS = "/home/nanda/Documents/Intern/crazyswarm/ros_ws/src/crazyswarm/"
+# ROS_WS = '/home/aditya/repos/crazyswarm/ros_ws/src/crazyswarm/'
 
 def second_largest(numbers):
     first, second = None, None
@@ -62,10 +68,17 @@ def get_color(node, intersecting_pairs, color_of_segments):
     return None
 
 def main():
-    f = open(HOME + "data/output.csv", "r")
-    csv_reader = csv.reader(f)
-    first_line = next(csv_reader)
-    matrix = np.loadtxt(f, delimiter=",", skiprows=0)
+    # f = open(HOME + "data/output.csv", "r")
+    # csv_reader = csv.reader(f)
+    # first_line = next(csv_reader)
+    # matrix = np.loadtxt(f, delimiter=",", skiprows=0)
+
+    with open(HOME + 'data/long_paths.json') as f:
+        segment_dicts = json.load(f)
+    segments = [Segment.from_dict(s_dict) for s_dict in segment_dicts]
+    n_segments = len(segments)
+    matrix = [[index, p.coords[0], p.coords[1], 0, 0] for index, s in enumerate(segments) for p in s.points]
+
     matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
 
     times = [sum(segment[i][1] for i in range(len(segment))) for segment in matrix]
@@ -81,7 +94,7 @@ def main():
 
         combinations = [(i,j) for i in range(len(locations)) for j in range(len(locations)) if i < j]
         distances = [distance(locations[i], locations[j]) for i, j in combinations]
-        is_intersecting = map(lambda x : x < EPSILON, distances)
+        is_intersecting = map(lambda x : x < COLLISION_DIST * POST_SCALING_FACTOR, distances)
         for index, elem in enumerate(is_intersecting):
             if elem:
                 intersecting_pairs.add(combinations[index])
@@ -101,14 +114,14 @@ def main():
         with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(segment_num), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
-            initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10]/FACTOR, 0))
-            heights.append(segment[0][2]/FACTOR)
+            initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10]/POST_SCALING_FACTOR, 0))
+            heights.append(segment[0][2]/POST_SCALING_FACTOR)
             for piece in segment:
-                temp = piece[10:18].copy()
+                # temp = piece[10:18].copy()
                 piece[18:26] = piece[2:10].copy()
-                piece[10:18] = temp
+                # piece[10:18] = temp
                 piece[2:10] = [0 for _ in range(8)]
-                writer.writerow(np.concatenate([[piece[1]], [(i/FACTOR) for i in piece[2:]]]))
+                writer.writerow(np.concatenate([[piece[1]], [(i/POST_SCALING_FACTOR) for i in piece[2:]]]))
 
     if VERBOSE_TEXT: print("InitialPositions: " + str(initialPositions))
     if VERBOSE_TEXT: print("Heights: " + str(heights))

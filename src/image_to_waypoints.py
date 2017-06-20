@@ -13,6 +13,9 @@ from constants import (
     SCALING_FACTOR,
     VERBOSE_TEXT,
     VERBOSE_IMAGE,
+    HEIGHT_OFFSET,
+    SCALING_FACTOR,
+    POST_SCALING_FACTOR,
 )
 from geometry import Point, Segment
 
@@ -62,8 +65,8 @@ def main():
     for s in segments:
         points = []
         for p in s.points:
-            new_point = (width - p.coords[0], p.coords[1], 0)
-            new_point = tuple([SCALING_FACTOR * x for x in new_point] + [0])
+            new_point = (width - p.coords[0] + (HEIGHT_OFFSET * POST_SCALING_FACTOR * SCALING_FACTOR), p.coords[1], 0)
+            new_point = tuple([x / SCALING_FACTOR for x in new_point] + [0])
             points.append(Point(new_point))
         scaled_segments.append(Segment(points))
 
