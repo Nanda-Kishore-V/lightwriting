@@ -17,6 +17,7 @@ from geometry import (
 import snap
 
 DER = 3
+MAX_VELOCITY = 3
 
 def find_value(rows,time):
     if len(rows) == 1:
@@ -35,6 +36,8 @@ def find_derivative_multiple(rows,time):
     for row in rows:
         der.append(find_derivative([row], time))
     return tuple(der)
+
+# def
 
 
 if __name__=="__main__":
@@ -73,30 +76,42 @@ if __name__=="__main__":
     for segment_num,input_data in enumerate(input_data_multiple):
         print(segment_num, " is being optimized.")
         wap_num = len(input_data[0])
+        print("wap_num {0}".format(wap_num))
 
         xy_axis.plot(input_data[1], input_data[0], 'ro')
-
-        # begin and end with no velocity and acceleration
-        for i in range(3):
-            input_data[i][0].extend([0.0, 0.0])
-            input_data[i][-1].extend([0.0, 0.0])
-
-        x_wp = np.array(input_data[0])
-        y_wp = np.array(input_data[1])
-        z_wp = np.array(input_data[2])
-        psi_wp = np.array(input_data[3])
-        #x = snap.Trajectory1D(x_wp)
-        #y = snap.Trajectory1D(y_wp)
-        x = snap.Trajectory1D(x_wp, der=DER)
-        y = snap.Trajectory1D(y_wp, der=DER)
-        z = snap.Trajectory1D(z_wp, der=DER)
-        psi = snap.Trajectory1D(psi_wp, der=DER)
-
         xy_lines = []
 
-        print('Running optimization routine...')
-        trajectory = snap.QrPath(x, y, z, psi, power=10.00, tilt=0.25, guess=5.00)
-        T = trajectory.optimize()  # an array of segment time length
+        if wap_num == 2:
+            T = (input_data[0][1][0] - input_data[0][0][0])**2
+            T += (input_data[1][1][0] - input_data[1][0][0])**2
+            T += (input_data[2][1][0] - input_data[2][0][0])**2
+            T = [(T**0.5)/MAX_VELOCITY]
+            x = [input_data[0][0][0], (input_data[0][1][0] - input_data[0][0][0])/T[0], 0, 0, 0, 0, 0, 0]
+            y = [input_data[1][0][0], (input_data[1][1][0] - input_data[1][0][0])/T[0], 0, 0, 0, 0, 0, 0]
+            z = [input_data[2][0][0], (input_data[2][1][0] - input_data[2][0][0])/T[0], 0, 0, 0, 0, 0, 0]
+            psi = [0] * 8
+
+        else:
+            # begin and end with no velocity and acceleration
+            for i in range(3):
+                input_data[i][0].extend([0.0, 0.0])
+                input_data[i][-1].extend([0.0, 0.0])
+
+            x_wp = np.array(input_data[0])
+            y_wp = np.array(input_data[1])
+            z_wp = np.array(input_data[2])
+            psi_wp = np.array(input_data[3])
+            #x = snap.Trajectory1D(x_wp)
+            #y = snap.Trajectory1D(y_wp)
+            x = snap.Trajectory1D(x_wp, der=DER)
+            y = snap.Trajectory1D(y_wp, der=DER)
+            z = snap.Trajectory1D(z_wp, der=DER)
+            psi = snap.Trajectory1D(psi_wp, der=DER)
+
+
+            print('Running optimization routine...')
+            trajectory = snap.QrPath(x, y, z, psi, power=10.00, tilt=0.25, guess=5.00)
+            T = trajectory.optimize()  # an array of segment time length
 
         with open(HOME + 'data/output.csv', 'a', newline='') as csvfile:
             spamwriter = csv.writer(csvfile)
@@ -106,13 +121,21 @@ if __name__=="__main__":
                 temp_z = ["z^"+str(degree) for degree in range(2*(DER+1))]
                 temp_yaw = ["yaw^"+str(degree) for degree in range(2*(DER+1))]
                 spamwriter.writerow(np.concatenate([[int(num_segments)],['duration'], temp_x, temp_y, temp_z, temp_yaw]))
-            for i in range(wap_num-1):
-                spamwriter.writerow(np.concatenate([[int(segment_num)],[T[i]], x.p[i], y.p[i], z.p[i], psi.p[i]]))
+            if wap_num == 2:
+                spamwriter.writerow(np.concatenate([[int(segment_num)],T, x, y, z, psi]))
+            else:
+                for i in range(wap_num-1):
+                    spamwriter.writerow(np.concatenate([[int(segment_num)],[T[i]], x.p[i], y.p[i], z.p[i], psi.p[i]]))
 
         tdata = np.arange(0, sum(T), 0.1)
-        xdata = [x(t) for t in tdata]
-        ydata = [y(t) for t in tdata]
-        zdata = [z(t) for t in tdata]
+        if wap_num == 2:
+            xdata = [find_value([x], t) for t in tdata]
+            ydata = [find_value([y], t) for t in tdata]
+            zdata = [find_value([z], t) for t in tdata]
+        else:
+            xdata = [x(t) for t in tdata]
+            ydata = [y(t) for t in tdata]
+            zdata = [z(t) for t in tdata]
 
         xy_lines.append(Line2D(ydata, xdata, linestyle='-', marker='', color='b'))
 
@@ -124,13 +147,22 @@ if __name__=="__main__":
         for t in T:
             wp_t.append(wp_t[-1] + t)
 
-        data[segment_num][0] = wp_t[-1]
-        data[segment_num][1:4] = find_value([x.p[0], y.p[0], z.p[0]], 0)
-        start_vector = np.array(find_derivative_multiple([x.p[0], y.p[0], z.p[0]], 0))
-        data[segment_num][4:7] = start_vector / np.linalg.norm(start_vector)
-        data[segment_num][7:10] = find_value([x.p[-1], y.p[-1], z.p[-1]], T[-1])
-        start_vector = -1 * np.array(find_derivative_multiple([x.p[-1], y.p[-1], z.p[-1]], wp_t[-1]))
-        data[segment_num][10:13] = start_vector / np.linalg.norm(start_vector)
+        if wap_num == 2:
+            data[segment_num][0] = T[0]
+            data[segment_num][1:4] = find_value([x, y, z], 0)
+            start_vector = np.array(find_derivative_multiple([x, y, z], 0))
+            data[segment_num][4:7] = start_vector / np.linalg.norm(start_vector)
+            data[segment_num][7:10] = find_value([x, y, z], T[0])
+            end_vector = -1 * np.array(find_derivative_multiple([x, y, z], T[0]))
+            data[segment_num][10:13] = end_vector / np.linalg.norm(end_vector)
+        else:
+            data[segment_num][0] = wp_t[-1]
+            data[segment_num][1:4] = find_value([x.p[0], y.p[0], z.p[0]], 0)
+            start_vector = np.array(find_derivative_multiple([x.p[0], y.p[0], z.p[0]], 0))
+            data[segment_num][4:7] = start_vector / np.linalg.norm(start_vector)
+            data[segment_num][7:10] = find_value([x.p[-1], y.p[-1], z.p[-1]], T[-1])
+            end_vector = -1 * np.array(find_derivative_multiple([x.p[-1], y.p[-1], z.p[-1]], T[-1]))
+            data[segment_num][10:13] = end_vector / np.linalg.norm(end_vector)
 
         with open(HOME + 'data/tangents.csv', 'a', newline='') as tangent_file:
             writer = csv.writer(tangent_file)

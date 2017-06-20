@@ -54,7 +54,7 @@ def main():
                 show_and_destroy('Image' + str(index), image_segment)
         cv2.destroyAllWindows()
 
-    segments = [s for s in segments if len(s.points) > 2]
+    # segments = [s for s in segments if len(s.points) > 2]
 
     scaled_segments = []
     for s in segments:
