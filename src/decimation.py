@@ -21,7 +21,7 @@ def decimate(points, reduced_points_min_dist=25, epsilon=1, epsilon_increment=0.
     points_reduced = [None] * len(points)
     points_reduced[start] = points[start]
     points_reduced[end] = points[end]
-    
+
     point_removed = False
     if VERBOSE_TEXT: print 'epsilon', epsilon
     while end_point_index_pairs:
@@ -45,17 +45,11 @@ def decimate(points, reduced_points_min_dist=25, epsilon=1, epsilon_increment=0.
     points_reduced = [p for p in points_reduced if p is not None]
     consecutive_distances = [Point.distance(p, points_reduced[i]) for i, p in enumerate(points_reduced[1:])]
     if min(consecutive_distances) < reduced_points_min_dist:
-        epsilon += epsilon_increment 
+        epsilon += epsilon_increment
         if VERBOSE_TEXT: print('We need to keep decimating. New epsilon is {}'.format(epsilon))
         if point_removed:
             if VERBOSE_IMAGE: show_points_as_image(points_reduced)
         return decimate(points, epsilon=epsilon)
-
-    if len(points_reduced) == 2:
-        mid_point = Point.find_section_point(1, *points_reduced)
-        mid_point.coords = [int(x) for x in mid_point.coords]
-        points_reduced.insert(1, mid_point)
-        if VERBOSE_TEXT: print('len', len(points_reduced))
 
     return points_reduced
 
