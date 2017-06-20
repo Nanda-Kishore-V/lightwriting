@@ -9,6 +9,7 @@ import json
 
 from constants import (
     VERBOSE_TEXT,
+    MAX_QUADROTOR_VELOCITY,
 )
 
 class GeometricEntity():
@@ -160,13 +161,10 @@ class Segment(GeometricEntity):
             points is a list of Points'''
         self.state = state
         self.points = points[:]
-        if time is None:
-            self.time = 0
-        else:
-            self.time = time
+        self.time = (time if time is not None else 0)
 
     def __repr__(self, end='\n', sep='\t'):
-        return 'Length: ' + str(self.length()) + sep + 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
+        return 'Time: ' + str(self.time) + 'Length: ' + str(self.length()) + sep + 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
 
     @staticmethod
     def to_dict(s):
@@ -197,15 +195,11 @@ class Segment(GeometricEntity):
         return sum([Point.distance(p, self.points[i + 1]) for i, p in enumerate(self.points[:-1])])
 
 class Path(GeometricEntity):
-    def __init__(self, segments, time=None):
+    def __init__(self, segments):
         self.segments = segments[:]
-        if time is None:
-            self.time = 0
-        else:
-            self.time = time
 
     def __repr__(self):
-        return 'Length: ' + str(self.length) + '\nSegments:\n' + str(self.segments) + '\n'
+        return 'Time:' + str(self.time()) + '\nLength: ' + str(self.length()) + '\nSegments:\n' + str(self.segments) + '\n'
 
     @staticmethod
     def to_dict(p):
@@ -227,7 +221,13 @@ class Path(GeometricEntity):
         return Path([Segment.from_dict(s_dict) for s_dict in p_dict['segments']])
 
     def length(self):
-        return sum([s.length() for s in self.segments])
+        return sum(s.length() for s in self.segments)
+
+    def time(self):
+        return sum(s.time for s in self.segments)
+
+    def pieces(self):
+        return sum(len(s.points) - 1 for s in self.segments)
 
     @staticmethod
     def join(p, q, joining_point_p, joining_point_q):
@@ -236,7 +236,11 @@ class Path(GeometricEntity):
             p.reverse()
         if joining_point_q in q.segments[-1].points:
             q.reverse()
-        segments_combined = p.segments + [Segment([joining_point_p, joining_point_p], False)] + q.segments
+
+        distance = Point.distance(joining_point_p, joining_point_q)
+        time = distance / MAX_QUADROTOR_VELOCITY
+        print('intermediate time: ' + str(time))
+        segments_combined = p.segments + [Segment([joining_point_p, joining_point_p], False, time)] + q.segments
         return Path(segments_combined)
 
     def reverse(self):

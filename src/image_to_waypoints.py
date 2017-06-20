@@ -48,15 +48,13 @@ def main():
         for i, s in enumerate(segments):
             print('{}: {}'.format(i, len(s.points)))
 
-    for index, segment in enumerate(segments):
-        image_segment = np.zeros(image.shape)
-        for segment in segments:
-            for point in segment.points:
-                image_segment[point.coords] = WHITE
-        if VERBOSE_IMAGE:
-            show_and_destroy('Image' + str(index), image_segment)
-
     if VERBOSE_IMAGE:
+        for index, segment in enumerate(segments):
+            image_segment = np.zeros(image.shape)
+            for segment in segments:
+                for point in segment.points:
+                    image_segment[point.coords] = WHITE
+                show_and_destroy('Image' + str(index), image_segment)
         cv2.destroyAllWindows()
 
     # segments = [s for s in segments if len(s.points) > 2]
