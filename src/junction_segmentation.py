@@ -1,16 +1,27 @@
-from __future__ import division
-from __future__ import print_function
+from __future__ import (
+    division,
+    print_function,
+    )
 import cv2
 import numpy as np
-import operator
 
-from constants import *
-from geometry import Point, Segment
+from constants import (
+    HOME,
+    DIRECTIONS,
+    WHITE,
+    BLACK,
+    VERBOSE_TEXT,
+    VERBOSE_IMAGE,
+)
+from geometry import (
+    Point,
+    Segment,
+)
 
 def find_white_neighbors(image, point):
     x, y = point
     width, height = image.shape
-    return [(x + dx, y + dy) for dx, dy in directions if 0 <= x + dx < width and 0 <= y + dy < height and image[x + dx, y + dy] == WHITE]
+    return [(x + dx, y + dy) for dx, dy in DIRECTIONS if 0 <= x + dx < width and 0 <= y + dy < height and image[x + dx, y + dy] == WHITE]
 
 def is_corner(image, point):
     return len(find_white_neighbors(image, point)) == 1
@@ -68,8 +79,9 @@ def junction_segmentation(image):
     # above this line, segments are just lists of tuples
     # now, segments become a list of Segment objects, each of which contains Point objects
     segments = [Segment([Point(p) for p in s]) for s in segments]
-    print('segments')
-    print(*segments, sep='\n')
+    if VERBOSE_TEXT:
+        print('segments')
+        print(*segments, sep='\n')
     return segments
 
 def main():
