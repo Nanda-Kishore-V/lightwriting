@@ -133,7 +133,7 @@ class Point(GeometricEntity):
         return Point(tuple(section_coords))
 
     @staticmethod
-    def distance_perpendicular_from_line(p, line_end_points):
+    def distance_to_line(p, line_end_points):
         '''Returns perpendicular distance between line passing through Points line_end_points and the Point p'''
         x0, y0 = p.coords
         x1, y1 = line_end_points[0].coords

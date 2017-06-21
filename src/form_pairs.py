@@ -48,7 +48,7 @@ def form_pairs(
         p = Path([s])
         paths.append(p)
 
-    paths.sort(key = lambda p: p.length)
+    paths.sort(key = lambda p: p.time)
 
     paths_combined = []
     m = MetricSurface()
@@ -102,16 +102,11 @@ def form_pairs(
     with open(HOME + 'data/output.csv') as f:
         matrix = np.loadtxt(f, delimiter=',', skiprows=1)
         matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
-    #print('matrix:')
-    #print(matrix)
 
-    print(path_dicts)
-    print(paths)
     file_temp = HOME + 'data/temp.csv'
     with open(file_temp, 'w') as f:
         writer = csv.writer(f)
         for index_path, p in enumerate(paths):
-            print('haha')
             for s in p.segments:
                 if s.index is None:
                     x0, y0, z0 = s.points[0].coords
