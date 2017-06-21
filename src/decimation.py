@@ -16,9 +16,10 @@ def decimate(
         epsilon=1,
         epsilon_increment=0.5,
     ):
-    '''Returns a list of Point by removing intermediate Points such that shape of curve is maintained
-        and distance between 2 consecutive Points is more than reduced_points_min_dist'''
-    if VERBOSE_TEXT: print('Current epsilon is: ' + str(epsilon))
+    '''Returns a list of Point by removing intermediate Points
+        such that shape of curve is maintained and distance between
+        2 consecutive Points is more than reduced_points_min_dist
+    '''
     start = 0
     end = len(points) - 1
 
@@ -28,20 +29,18 @@ def decimate(
     points_reduced[end] = points[end]
 
     point_removed = False
-    if VERBOSE_TEXT: print('epsilon: ' + str(epsilon))
     while end_point_index_pairs:
         start, end = end_point_index_pairs.pop(0)
         if start + 1 == end:
             continue
 
         line_end_points = (points[start], points[end])
-        errors = [Point.distance_perpendicular_from_line(p, line_end_points) for i, p in enumerate(points) if start < i < end]
+        errors = [Point.distance_to_line(p, line_end_points) for p in points[start + 1:end]]
 
-        error_max = max(errors)
-        if error_max < epsilon:
+        if max(errors) < epsilon:
             continue
 
-        index = start + errors.index(error_max) + 1
+        index = start + errors.index(max(errors)) + 1
         points_reduced[index] = points[index]
         end_point_index_pairs.append((start, index))
         end_point_index_pairs.append((index, end))
@@ -61,6 +60,7 @@ def decimate(
 if __name__ == '__main__':
     points = []
     raise IOError('file is no longer generated')
+    '''
     with open(HOME + 'data/segments/segment' + '0', 'r') as f:
         lines = f.readlines()
         for line in lines:
@@ -82,3 +82,4 @@ if __name__ == '__main__':
     for p in points_reduced:
         image[p] = WHITE
     if VERBOSE_IMAGE: show_and_destory(image)
+    '''

@@ -1,9 +1,5 @@
-1) scale down simulated lengths of segments to < 0.4m
-2) for straight lines, use x(t) = x1 + t * (x2 - x1)/time if QP doesnt work.
-3) add height offset to prevent quadrotors hitting the ground
-4) change output of generation.py and input of form_pairs.py to .JSON
-5) Use homogeneous coordinates after position of camera is known.
-6) Limit Segment combination to time and number of pieces per segment.
+1) Use homogeneous coordinates after position of camera is known.
+2) change output of generation.py and input of form_pairs.py to .JSON
 
 finish by Friday - simulation and find camera
 last week - run demos on h/w

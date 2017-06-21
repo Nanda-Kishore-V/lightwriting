@@ -10,6 +10,7 @@ import json
 from constants import (
     HOME,
     VERBOSE_TEXT,
+    MAX_QUADROTOR_VELOCITY,
 )
 from geometry import (
     Segment,
@@ -17,9 +18,8 @@ from geometry import (
 import snap
 
 DER = 3
-MAX_VELOCITY = 3
 
-def find_value(rows,time):
+def find_value(rows, time):
     if len(rows) == 1:
         return Polynomial(*rows[0])(time)
     P = []
@@ -27,11 +27,11 @@ def find_value(rows,time):
         P.append(Polynomial(*row))
     return tuple([poly(time) for poly in P])
 
-def find_derivative(row,time):
+def find_derivative(row, time):
     del_t = 0.001
     return (find_value(row, time+del_t) - find_value(row, time))/del_t
 
-def find_derivative_multiple(rows,time):
+def find_derivative_multiple(rows, time):
     der = []
     for row in rows:
         der.append(find_derivative([row], time))
@@ -52,13 +52,12 @@ if __name__=="__main__":
     with open(HOME + 'data/waypoints.json') as f:
         segment_dicts = json.load(f)
     segments = [Segment.from_dict(s_dict) for s_dict in segment_dicts]
-    n_segments = len(segments)
-    matrix = [[index, p.coords[0], p.coords[1], 0, 0]for index, s in enumerate(segments) for p in s.points]
+    matrix = [[index, p.coords[0], p.coords[1], 0, 0] for index, s in enumerate(segments) for p in s.points]
     if VERBOSE_TEXT:
         print(*segments, sep='\n')
         print(*matrix, sep='\n')
 
-    num_segments = int(n_segments)
+    num_segments = len(segments)
 
     input_data_multiple = [[[], [], [], []] for _ in range(num_segments)]
     curr_segment = 0
@@ -81,10 +80,12 @@ if __name__=="__main__":
         xy_lines = []
 
         if wap_num == 2:
+            print('Input data')
+            print(input_data)
             T = (input_data[0][1][0] - input_data[0][0][0])**2
             T += (input_data[1][1][0] - input_data[1][0][0])**2
             T += (input_data[2][1][0] - input_data[2][0][0])**2
-            T = [(T**0.5)/MAX_VELOCITY]
+            T = [(T**0.5)/MAX_QUADROTOR_VELOCITY]
             x = [input_data[0][0][0], (input_data[0][1][0] - input_data[0][0][0])/T[0], 0, 0, 0, 0, 0, 0]
             y = [input_data[1][0][0], (input_data[1][1][0] - input_data[1][0][0])/T[0], 0, 0, 0, 0, 0, 0]
             z = [input_data[2][0][0], (input_data[2][1][0] - input_data[2][0][0])/T[0], 0, 0, 0, 0, 0, 0]

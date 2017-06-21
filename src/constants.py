@@ -17,6 +17,7 @@ WHITE = 255
 offset_list = [-1,0,1]
 DIRECTIONS = [(i,j) for i in offset_list for j in offset_list]
 DIRECTIONS.remove((0,0))
+del offset_list
 
 SIZE_OF_QUAD = 0.1 # in m
 MAX_QUADROTOR_VELOCITY = 1.5 # in m/s
