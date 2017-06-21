@@ -156,12 +156,13 @@ class Point(GeometricEntity):
 
 
 class Segment(GeometricEntity):
-    def __init__(self, points, state=True, time=None):
+    def __init__(self, points, state=True, time=None, index=None):
         '''Boolean state tells whether segment is visible or not
             points is a list of Points'''
         self.state = state
         self.points = points[:]
         self.time = (time if time is not None else 0)
+        self.index = index
 
     def __repr__(self, end='\n', sep='\t'):
         return 'Time: ' + str(self.time) + 'Length: ' + str(self.length()) + sep + 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
