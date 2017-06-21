@@ -8,7 +8,7 @@ HOME += '/'
 
 # debug
 VERBOSE_IMAGE = False
-VERBOSE_TEXT = False    
+VERBOSE_TEXT = False
 
 # standard constants
 BLACK = 0
@@ -20,6 +20,8 @@ DIRECTIONS.remove((0,0))
 
 SIZE_OF_QUAD = 0.1 # in m
 MAX_QUADROTOR_VELOCITY = 1.5 # in m/s
+MAX_PIECEWISE_POLYNOMIALS = 30
+CAMERA_EXPOSURE_TIME_LIMIT = 20 # in s
 
 FINAL_WIDTH = 6.0 # in m
 FINAL_HEIGHT = 1.5 # in m

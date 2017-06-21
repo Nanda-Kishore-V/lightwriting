@@ -68,17 +68,10 @@ def get_color(node, intersecting_pairs, color_of_segments):
     return None
 
 def main():
-    # f = open(HOME + "data/output.csv", "r")
-    # csv_reader = csv.reader(f)
-    # first_line = next(csv_reader)
-    # matrix = np.loadtxt(f, delimiter=",", skiprows=0)
-
-    with open(HOME + 'data/long_paths.json') as f:
-        segment_dicts = json.load(f)
-    segments = [Segment.from_dict(s_dict) for s_dict in segment_dicts]
-    n_segments = len(segments)
-    matrix = [[index, p.coords[0], p.coords[1], 0, 0] for index, s in enumerate(segments) for p in s.points]
-
+    f = open(HOME + "data/temp.csv", "r")
+    csv_reader = csv.reader(f)
+    first_line = next(csv_reader)
+    matrix = np.loadtxt(f, delimiter=",", skiprows=0)
     matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
 
     times = [sum(segment[i][1] for i in range(len(segment))) for segment in matrix]
