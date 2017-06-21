@@ -1,7 +1,7 @@
 all:
 	#bash run.sh -f "Calligraffiti" -t 'k'
 	#bash run.sh -f "Ubuntu" -t 'k'
-	bash run.sh -f "Ubuntu" -t 'USC'
+	bash run.sh -f "Ubuntu" -t '+'
 
 clean: clean_src clean_data
 
