@@ -1,5 +1,6 @@
 1) Use homogeneous coordinates after position of camera is known.
-2) change output of generation.py and input of form_pairs.py to .JSON
+2) Change output of generation.py and input of form_pairs.py to .JSON
+3) Remove unnecessary small straight lines formed by skeletonization at corners of letters
 
 finish by Friday - simulation and find camera
 last week - run demos on h/w

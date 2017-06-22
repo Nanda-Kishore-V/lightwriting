@@ -10,6 +10,11 @@ import json
 from constants import (
     VERBOSE_TEXT,
     MAX_QUADROTOR_VELOCITY,
+    WHITE,
+)
+
+from debug_cv2 import (
+    show_and_destroy
 )
 
 class GeometricEntity():
@@ -33,26 +38,33 @@ class GeometricEntity():
 
 class Vector(GeometricEntity):
     def __init__(self, coords_end, coords_start=None):
-        '''coords_end: tuple
-            coords_start: tuple or None'''
+        '''
+        coords_end: tuple
+        coords_start: tuple
+        '''
+        assert(coords_end is not None)
         if coords_start is None:
             self.coords = tuple(coords_end)
         else:
-            self.coords = tuple(map(operator.sub, coords_end, coords_start))
+            self.coords = tuple(np.subtract(coords_end, coords_start))
 
     def __repr__(self, end=''):
-        return 'Coord: ' + str(self.coords) + end
+        return 'Coords: ' + str(self.coords) + end
 
     @staticmethod
     def to_dict(v):
-        '''Returns a dictionary representation of Vector v which is JSON serializable'''
+        '''
+        Return dictionary from Vector v
+        '''
         if v is None:
             return None
         return {'coords': v.coords}
 
     @staticmethod
     def from_dict(v_dict):
-        '''Returns a Vector v by converting the dictionary representation of Vector provided by v_dict'''
+        '''
+        Return Vector from dictionary v_dict
+        '''
         if v_dict is None:
             return None
         coords = v_dict.get('coords')
@@ -61,20 +73,33 @@ class Vector(GeometricEntity):
         return Vector(coords)
 
     def norm(self):
+        '''
+        Return magnitude of self
+        '''
         return np.linalg.norm(self.coords)
 
     def normalize(self):
+        '''
+        Return self after normalizing self
+        '''
         self.coords /= self.norm()
+        return self
 
     def unit(self):
-        '''Returns a unit vector corresponding to self'''
+        '''
+        Return unit Vector of self without changing self
+        '''
         u = copy.deepcopy(self)
         u.normalize()
         return u
 
     @staticmethod
     def angle_between(u, v):
-        '''Returns interior angle (< 180 degree) formed by Vector u and Vector v'''
+        '''
+        Return interior angle (< 180 degree) formed by Vectors u and v
+        '''
+        assert(u is not None)
+        assert(v is not None)
         dot_product = np.dot(u.coords, v.coords)
         dot_product_normalized = dot_product / (u.norm() * v.norm())
         # why are we clipping value?
@@ -83,10 +108,15 @@ class Vector(GeometricEntity):
 
 class Point(GeometricEntity):
     def __init__(self, coords, tgt_at_point=None):
-        '''coords: tuple
-            tgt_at_point: Vector'''
+        '''
+        coords: tuple
+        tgt_at_point: Vector
+        '''
         self.coords = tuple(coords)
         self.tgt = tgt_at_point
+        if self.tgt is not None:
+            assert len(self.coords) == len(self.tgt.coords), \
+                'Point and its tangent have different dimensions'
 
     def __repr__(self, end='', sep='\t'):
         my_string = 'Coord: ' + str(self.coords)
@@ -97,7 +127,9 @@ class Point(GeometricEntity):
 
     @staticmethod
     def to_dict(p):
-        '''Returns a dictionary representation of Point p which is JSON serializable'''
+        '''
+        Return dictionary from Point p
+        '''
         if p is None:
             return None
         p_dict = {'coords': p.coords}
@@ -107,7 +139,9 @@ class Point(GeometricEntity):
 
     @staticmethod
     def from_dict(p_dict):
-        '''Returns a Point p by converting the dictionary representation of Point provided by p_dict'''
+        '''
+        Return Point from dictionary p_dict
+        '''
         if p_dict is None:
             return None
         coords = p_dict.get('coords')
@@ -118,35 +152,72 @@ class Point(GeometricEntity):
 
     @staticmethod
     def distance(p, q):
-        '''Returns Euclidean distance between Point p and Point q'''
+        '''
+        Return Euclidean distance between Points p and q
+        '''
         a = np.array(p.coords)
         b = np.array(q.coords)
         return np.linalg.norm(a - b)
 
     @staticmethod
-    def find_section_point(ratio, a, b):
-        '''Returns the section point of line segment with end points as
-            Point a and Point b using section ratio from a to b'''
+    def section_point(ratio, a, b):
+        '''
+        Return section Point of line 'ab' 
+        
+        ratio: section ratio directed from a to b
+        a: Point
+        b: Point
+        '''
         coords1 = np.array(a.coords)
         coords2 = np.array(b.coords)
         section_coords = (coords1 + ratio * coords2) / (1 + ratio)
-        return Point(tuple(section_coords))
+        return Point(section_coords)
 
     @staticmethod
-    def distance_to_line(p, line_end_points):
-        '''Returns perpendicular distance between line passing through Points line_end_points and the Point p'''
+    def mid_point(a, b):
+        '''Return mid Point of line 'ab'
+
+        a: Point
+        b: Point
+        '''
+        return Point.section_point(1, a, b)
+
+    @staticmethod
+    def distance_to_line(p, line):
+        '''
+        Return perpendicular distance of p to line
+
+        p: Point
+        line: tuple containing 2 end Points
+        '''
         x0, y0 = p.coords
-        x1, y1 = line_end_points[0].coords
-        x2, y2 = line_end_points[1].coords
-        distance = abs((y2 - y1) * x0  - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2)
-        return distance
+        x1, y1 = line[0].coords
+        x2, y2 = line[1].coords
+        x_diff = x2 - x1
+        y_diff = y2 - y1
+        distance_perpendicular = \
+            abs( \
+                (y_diff * x0  - x_diff * y0 + x2 * y1 - y2 * x1) \
+                / Point.distance(*line)
+            )
+        return distance_perpendicular
 
     @staticmethod
     def to_image(points, width=None, height=None):
+        '''
+        Show points as WHITE pixels on BLACK background
+
+        points: list of Points
+        width: width of image generated
+        height: height of image generated
+        '''
         x_coords = [p.coords[0] for p in points]
         y_coords = [p.coords[1] for p in points]
-        width = max(x_coords)
-        height = max(y_coords)
+        width = max(x_coords) + 1 if width is None else width
+        height = max(y_coords) + 1 if height is None else height
+
+        assert isinstance(width, (int, long)) and width > 0
+        assert isinstance(height, (int, long)) and height > 0
 
         image = np.zeros((width, height), dtype=np.uint8)
         for p in points:
@@ -157,29 +228,45 @@ class Point(GeometricEntity):
 
 class Segment(GeometricEntity):
     def __init__(self, points, state=True, time=None, index=None):
-        '''Boolean state tells whether segment is visible or not
-            points is a list of Points'''
+        '''
+        points: list of Points
+        state: Boolean - whether self is visible or not
+        time: time required for quadrotor to fly over self
+        index: index of segment in .csv files
+        '''
         self.state = state
         self.points = points[:]
         self.time = (time if time is not None else 0)
         self.index = index
 
-    def __repr__(self, end='\n', sep='\t'):
-        return 'Time: ' + str(self.time) + 'Length: ' + str(self.length()) + sep + 'State: ' + str(self.state) + sep + 'Pts: ' + str(self.points) + end
+    def __repr__(self, sep='\t', end='\n'):
+        return 'Index: ' + str(self.index) + sep \
+                + 'Time: ' + str(self.time) + sep \
+                + 'Length: ' + str(self.length()) + sep \
+                + 'State: ' + str(self.state) + sep \
+                + 'Pts: ' + str(self.points) + end
 
     @staticmethod
     def to_dict(s):
-        '''Returns a dictionary representation of Segment s which is JSON serializable'''
+        '''
+        Return dictionary from Segment s
+        '''
         if s is None:
             return None
         s_dict = {'points': [Point.to_dict(p) for p in s.points]}
         if s.state != True:
             s_dict['state'] = s.state
+        if s.time is not None:
+            s_dict['time'] = s.time
+        if s.index is not None:
+            s_dict['index'] = s.index
         return s_dict
 
     @staticmethod
     def from_dict(s_dict):
-        '''Returns a Segment s by converting the dictionary representation of Segment provided by s_dict'''
+        '''
+        Return Segment from dictionary s_dict
+        '''
         if s_dict is None:
             return None
         point_dicts = s_dict.get('points')
@@ -187,24 +274,37 @@ class Segment(GeometricEntity):
             return None
         points = [Point.from_dict(p_dict) for p_dict in point_dicts]
         state = s_dict.get('state', True)
-        return Segment(points, state)
+        time = s_dict.get('time', None)
+        index = s_dict.get('index', None)
+        return Segment(points, state, time, index)
 
     def reverse(self):
+        '''
+        Reverse order of self's Points
+        '''
         self.points.reverse()
 
     def length(self):
-        return sum([Point.distance(p, self.points[i + 1]) for i, p in enumerate(self.points[:-1])])
+        return sum(
+            Point.distance(p, self.points[i + 1]) \
+            for i, p in enumerate(self.points[:-1])
+        )
 
 class Path(GeometricEntity):
     def __init__(self, segments):
         self.segments = segments[:]
 
-    def __repr__(self):
-        return 'Time:' + str(self.time()) + '\nLength: ' + str(self.length()) + '\nSegments:\n' + str(self.segments) + '\n'
+    def __repr__(self, sep='\t', end='\n'):
+        return 'Time:' + str(self.time()) + sep \
+            + 'Length: ' + str(self.length()) + sep \
+            + 'Pieces: ' + str(self.pieces()) \
+            + '\nSegments:\n' + str(self.segments) + end
 
     @staticmethod
     def to_dict(p):
-        '''Returns a dictionary representation of Path p which is JSON serializable'''
+        '''
+        Return dictionary from Path p
+        '''
         if p is None:
             return None
         if p.segments is None:
@@ -213,46 +313,68 @@ class Path(GeometricEntity):
 
     @staticmethod
     def from_dict(p_dict):
-        '''Returns a Path p by converting the dictionary representation of Path provided by p_dict'''
+        '''
+        Return Path from dictionary p_dict
+        '''
         if p_dict is None:
             return None
-        segments = p_dict.get('segments')
-        if segments is None:
+        s_dicts = p_dict.get('segments')
+        if s_dicts is None:
             return None
-        return Path([Segment.from_dict(s_dict) for s_dict in p_dict['segments']])
+        return Path([Segment.from_dict(s_dict) for s_dict in s_dicts])
 
     def length(self):
+        '''
+        Return total length of self
+        '''
         return sum(s.length() for s in self.segments)
 
     def time(self):
+        '''
+        Return total time required for quadrotors to fly over self
+        '''
         return sum(s.time for s in self.segments)
 
     def pieces(self):
+        '''
+        Return total number of piecewise polynomials in self
+        '''
         return sum(len(s.points) - 1 for s in self.segments)
 
     @staticmethod
-    def join(p, q, joining_point_p, joining_point_q):
-        ''' Joins Path p with Path q and returns a new path'''
-        if joining_point_p in p.segments[0].points:
+    def join(p, q, a, b):
+        '''
+        Return Path formed by joining Paths p and q
+        at joining Points a and b of p and q respectively
+        '''
+        if a is p.segments[0].points[0]:
+            print('reversed first path')
             p.reverse()
-        if joining_point_q in q.segments[-1].points:
+        if b is q.segments[-1].points[-1]:
+            print('reversed second path')
             q.reverse()
 
-        distance = Point.distance(joining_point_p, joining_point_q)
+        distance = Point.distance(a, b)
         time = distance / MAX_QUADROTOR_VELOCITY
-        print('intermediate time: ' + str(time))
-        segments_combined = p.segments + [Segment([joining_point_p, joining_point_p], False, time)] + q.segments
+        segments_combined = p.segments + [Segment([a, b], False, time)] + q.segments
         return Path(segments_combined)
 
     def reverse(self):
-        '''Reverses the list of segments and reverses each segment'''
+        '''
+        Reverses order of self's Points and Segments
+        '''
         self.segments.reverse()
         for s in self.segments:
             s.reverse()
 
     @staticmethod
     def select_pair(p, q, m):
-        '''Finds 4 metrics of Path p and Path q using MetricSurface m'''
+        '''
+        Find best of 4 metric combinations using MetricSurface m on
+        end Points of Paths p and q
+
+        Return highest metric and the two corresponding end Points
+        '''
         paths = [p, q]
         points_end = [[] for p in paths]
         for path_index, path in enumerate(paths):
@@ -261,12 +383,10 @@ class Path(GeometricEntity):
 
         index_best_p = None
         index_best_q = None
-        #metric_best = -1
         metric_best = float("-inf")
         for index_p in range(2):
             for index_q in range(2):
                 metric_curr = m.metric(points_end[0][index_p], points_end[1][index_q])
-                if VERBOSE_TEXT: print('metric_curr', metric_curr)
                 if metric_curr > metric_best:
                     metric_best = metric_curr
                     index_best_p = index_p
@@ -279,7 +399,8 @@ class Hyperbola():
     def find_coefficients(p, q, curvature):
         '''Finds the coefficients of a hyperbola of the form 
             (x - x_offset) * (y - y_offset) = curvature
-            passing through Point p and Point q'''
+            passing through Point p and Point q
+        '''
         x2, _, y2 = p.coords
         x1, _, y1 = q.coords
         b = -1 * (y1 + y2)
@@ -304,8 +425,8 @@ class MetricSurface():
         theta = 180 - Vector.angle_between(point_start.tgt, point_end.tgt)
         
         ratio = dist / (self.D_MAX - dist)
-        point_zero = Point.find_section_point(ratio, *self.LINE_THETA_ZERO)
-        point_end = Point.find_section_point(ratio, *self.LINE_THETA_END)
+        point_zero = Point.section_point(ratio, *self.LINE_THETA_ZERO)
+        point_end = Point.section_point(ratio, *self.LINE_THETA_END)
         a, b = Hyperbola.find_coefficients(point_zero, point_end, self.curvature)
         # (theta - a) * (metric - b) = curvature
         return self.curvature/(theta - a) + b
