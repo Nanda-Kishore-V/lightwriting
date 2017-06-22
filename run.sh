@@ -16,7 +16,7 @@ done
 pointsize=500
 
 # create image with required text
-convert -background white -font $font -size 2000x2000 -fill black -pointsize $pointsize -gravity center label:$text -trim -bordercolor "#FFF" -border 10 data/images/temporary.bmp
+convert -background white -font "$font" -size 30000x7500 -fill black -pointsize $pointsize -gravity center label:"$text" -trim -bordercolor "#FFF" -border 10 data/images/temporary.bmp
 
 python src/image_preprocessing.py
 
