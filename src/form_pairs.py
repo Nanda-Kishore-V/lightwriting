@@ -106,6 +106,7 @@ def form_pairs(
     file_temp = HOME + 'data/temp.csv'
     with open(file_temp, 'w') as f:
         writer = csv.writer(f)
+        writer.writerow(np.concatenate([['Index', 'Duration'], [x + '^' + str(i) for x in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
         for index_path, p in enumerate(paths):
             for s in p.segments:
                 if s.index is None:

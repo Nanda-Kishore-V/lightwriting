@@ -11,11 +11,12 @@ from constants import (
     VERBOSE_TEXT,
     MAX_QUADROTOR_VELOCITY,
     WHITE,
+    POST_SCALING_FACTOR,
 )
 
-from debug_cv2 import (
-    show_and_destroy
-)
+# from debug_cv2 import (
+#     show_and_destroy
+# )
 
 class GeometricEntity():
     __metaclass__ = ABCMeta
@@ -162,8 +163,8 @@ class Point(GeometricEntity):
     @staticmethod
     def section_point(ratio, a, b):
         '''
-        Return section Point of line 'ab' 
-        
+        Return section Point of line 'ab'
+
         ratio: section ratio directed from a to b
         a: Point
         b: Point
@@ -227,7 +228,7 @@ class Point(GeometricEntity):
 
 
 class Segment(GeometricEntity):
-    def __init__(self, points, state=True, time=None, index=None):
+    def __init__(self, points, state=True, time=None, index=None, is_reversed=False):
         '''
         points: list of Points
         state: Boolean - whether self is visible or not
@@ -238,6 +239,7 @@ class Segment(GeometricEntity):
         self.points = points[:]
         self.time = (time if time is not None else 0)
         self.index = index
+        self.is_reversed = is_reversed
 
     def __repr__(self, sep='\t', end='\n'):
         return 'Index: ' + str(self.index) + sep \
@@ -283,6 +285,8 @@ class Segment(GeometricEntity):
         Reverse order of self's Points
         '''
         self.points.reverse()
+        if not (self.is_reversed is None):
+            self.is_reversed = not self.is_reversed
 
     def length(self):
         return sum(
@@ -355,8 +359,8 @@ class Path(GeometricEntity):
             q.reverse()
 
         distance = Point.distance(a, b)
-        time = distance / MAX_QUADROTOR_VELOCITY
-        segments_combined = p.segments + [Segment([a, b], False, time)] + q.segments
+        time = (distance * POST_SCALING_FACTOR) / MAX_QUADROTOR_VELOCITY
+        segments_combined = p.segments + [Segment([a, b], False, time, is_reversed=None)] + q.segments
         return Path(segments_combined)
 
     def reverse(self):
@@ -397,7 +401,7 @@ class Path(GeometricEntity):
 class Hyperbola():
     @staticmethod
     def find_coefficients(p, q, curvature):
-        '''Finds the coefficients of a hyperbola of the form 
+        '''Finds the coefficients of a hyperbola of the form
             (x - x_offset) * (y - y_offset) = curvature
             passing through Point p and Point q
         '''
@@ -423,7 +427,7 @@ class MetricSurface():
         dist = Point.distance(point_start, point_end)
         # we want our vectors to be as antiparallel as possible
         theta = 180 - Vector.angle_between(point_start.tgt, point_end.tgt)
-        
+
         ratio = dist / (self.D_MAX - dist)
         point_zero = Point.section_point(ratio, *self.LINE_THETA_ZERO)
         point_end = Point.section_point(ratio, *self.LINE_THETA_END)

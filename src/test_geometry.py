@@ -95,7 +95,7 @@ def test_path():
             Point((1, 3), Vector((1, 1))),
             ]
     s2 = Segment(points, time=3, index=1)
-    
+
     p1 = Path([s1])
     print('p1', p1)
 
@@ -117,16 +117,20 @@ def test_path():
     metric, (a, b) = Path.select_pair(p1, p2, MetricSurface())
     p3 = Path.join(p1, p2, a, b)
     print('p3', p3)
+    for index,s in enumerate(p3.segments):
+        print('index: {}, is_reversed: {}'.format(index, s.is_reversed))
 
     p3.reverse()
     print('p3 reversed', p3)
+    for index,s in enumerate(p3.segments):
+        print('index: {}, is_reversed: {}'.format(index, s.is_reversed))
 
 def main():
-    #test_vector()
+    # test_vector()
     #test_point()
-    #test_segment()
-    #test_path()
-    print('All tests are commented')
+    # test_segment()
+    test_path()
+    # print('All tests are commented')
 
 if __name__ == '__main__':
     main()
