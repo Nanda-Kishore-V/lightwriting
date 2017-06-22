@@ -1,1 +1,0 @@
-autotrace -output-file output.svg -output-format svg output.ppm 
