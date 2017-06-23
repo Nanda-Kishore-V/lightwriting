@@ -11,6 +11,7 @@ from constants import (
     VERBOSE_TEXT,
     MAX_PIECEWISE_POLYNOMIALS,
     CAMERA_EXPOSURE_TIME_LIMIT,
+    MAX_QUADROTOR_VELOCITY,
 )
 from geometry import (
     Vector,
@@ -118,8 +119,34 @@ def form_pairs(
                     single_row = [index_path, s.time] + [x0, x_vel] + [0] * 6 + [y0, y_vel] + [0] * 6 + [z0, z_vel] + [0] * 14
                     writer.writerow(single_row)
                     continue
+                if s.is_reversed:
+                    reversed_segment = []
+                    for piece in matrix[s.index]:
+                        duration = float(piece[1])
+                        change_of_variable = np.poly1d([1, -1.0*duration])
+
+                        poly1d_x = piece[2:10][::-1]
+                        poly1d_x = np.poly1d([p*(-1)**(index+1) for index, p in enumerate(poly1d_x)])
+                        poly1d_x = np.array(np.polyval(poly1d_x, change_of_variable))[::-1]
+                        poly1d_y = piece[10:18][::-1]
+                        poly1d_y = np.poly1d([p*(-1)**(index+1) for index, p in enumerate(poly1d_y)])
+                        poly1d_y = np.array(np.polyval(poly1d_y, change_of_variable))[::-1]
+                        poly1d_z = piece[18:26][::-1]
+                        poly1d_z = np.poly1d([p*(-1)**(index+1) for index, p in enumerate(poly1d_z)])
+                        poly1d_z = np.array(np.polyval(poly1d_z, change_of_variable))[::-1]
+
+                        if len(poly1d_x) < 8:
+                            poly1d_x = np.concatenate((poly1d_x, [0. for _ in range(8 - len(poly1d_x))]))
+                        if len(poly1d_y) < 8:
+                            poly1d_y = np.concatenate((poly1d_y, [0. for _ in range(8 - len(poly1d_y))]))
+                        if len(poly1d_z) < 8:
+                            poly1d_z = np.concatenate((poly1d_z, [0. for _ in range(8 - len(poly1d_z))]))
+
+                        new_piece = np.concatenate(([0, duration], poly1d_x, poly1d_y, poly1d_z, [0 for _ in range(8)]))
+                        reversed_segment.append(new_piece)
+                    matrix[s.index] = reversed_segment[::-1]
                 for line in matrix[s.index]:
-                    writer.writerow(np.concatenate([[index_path], line[1:]]))
+                        writer.writerow(np.concatenate([[index_path], line[1:]]))
 
 def main():
     file_ip = HOME + 'data/tangents.csv'

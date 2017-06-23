@@ -359,7 +359,7 @@ class Path(GeometricEntity):
             q.reverse()
 
         distance = Point.distance(a, b)
-        time = (distance * POST_SCALING_FACTOR) / MAX_QUADROTOR_VELOCITY
+        time = distance / (MAX_QUADROTOR_VELOCITY * POST_SCALING_FACTOR)
         segments_combined = p.segments + [Segment([a, b], False, time, is_reversed=None)] + q.segments
         return Path(segments_combined)
 
