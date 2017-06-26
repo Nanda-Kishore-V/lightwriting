@@ -13,13 +13,8 @@ do
 	esac
 done
 
-pointsize=500
-
 # create image with required text
-convert -background white -font "$font" -size 30000x7500 -fill black -pointsize $pointsize -gravity center label:"$text" -trim -bordercolor "#FFF" -border 10 data/images/temporary.bmp
-
-python src/image_preprocessing.py
-
+convert -background white -gravity center -size 3000x750 -font "$font" label:"$text" -threshold 50% data/images/temporary.bmp
 echo 'image generated from text!'
 
 python src/image_to_waypoints.py

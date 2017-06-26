@@ -1,5 +1,4 @@
 all:
-	#bash run.sh -f "Calligraffiti" -t 'k'
 	bash run.sh -f "Ubuntu" -t 'Happy'
 
 clean: clean_src clean_data
