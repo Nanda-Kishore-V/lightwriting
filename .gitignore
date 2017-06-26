@@ -1,0 +1,6 @@
+src/__pycache__/*
+src/*.pyc
+data/*.json
+data/*.csv
+data/images/*
+data/segments/*
