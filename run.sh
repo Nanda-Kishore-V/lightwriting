@@ -14,7 +14,7 @@ do
 done
 
 # create image with required text
-convert -background white -gravity center -size 3000x750 -font "$font" label:"$text" -threshold 50% data/images/temporary.bmp
+convert -background white -gravity center -size 3000x750 -font "$font" label:"$text" -threshold 50% data/images/black_text.bmp
 echo 'image generated from text!'
 
 python src/image_to_waypoints.py
