@@ -22,8 +22,8 @@ from geometry import (
     Point,
 )
 
-ROS_WS = "/home/nanda/Documents/Intern/crazyswarm/ros_ws/src/crazyswarm/"
-# ROS_WS = '/home/aditya/repos/crazyswarm/ros_ws/src/crazyswarm/'
+#ROS_WS = "/home/nanda/Documents/Intern/crazyswarm/ros_ws/src/crazyswarm/"
+ROS_WS = HOME + '../crazyswarm/ros_ws/src/crazyswarm/'
 
 def second_largest(numbers):
     first, second = None, None
