@@ -68,7 +68,7 @@ def get_color(node, intersecting_pairs, color_of_segments):
     return None
 
 def main():
-    f = open(HOME + "data/temp.csv", "r")
+    f = open(HOME + "data/output.csv", "r")
     csv_reader = csv.reader(f)
     first_line = next(csv_reader)
     matrix = np.loadtxt(f, delimiter=",", skiprows=0)
@@ -77,7 +77,7 @@ def main():
     times = [sum(segment[i][1] for i in range(len(segment))) for segment in matrix]
     dt = min(times)/100.0
     t = 0
-    limit = second_largest(times)
+    limit = max(times)
 
     intersecting_pairs = Set([])
     while t <= limit:
