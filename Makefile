@@ -1,8 +1,8 @@
 all:
-	bash run.sh -f "Calligraffiti" -t 'p'
+	shell_scripts/run.sh -f "Calligraffiti" -t 'act'
 
 generate_image:
-	bash generate_image.sh -f "Ubuntu" -t '|'
+	shell_scripts/generate_image.sh -f "Ubuntu" -t 'text'
 
 clean: clean_src clean_data
 
@@ -14,10 +14,3 @@ clean_data:
 	rm -f data/*.csv
 	rm -f data/*.json
 	rm -f data/images/*
-	rm -f data/segments/*
-
-limit_width:
-	bash run.sh -t "aovawjvea;jckajvlekajvdklsjdcjfdkcafnvdvdcsdajdkjsadvasc" -f 'Ubuntu'
-
-limit_height:
-	bash run.sh -t "aov\nawj\nvea;j\nckajv\nl\nekajvdk\nlsjdc\njfdk\nca\nfnv\ndvdcs\ndaj\ndkjs\nadvasc" -f 'Ubuntu'
