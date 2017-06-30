@@ -1,16 +1,26 @@
+SRC_DIR=src
+SCRIPT_DIR=shell_scripts
+DATA_DIR=data
+
+TEXT=act
+FONT=Calligraffiti
+
 all:
-	shell_scripts/run.sh -f "Calligraffiti" -t 'act'
+	$(SCRIPT_DIR)/run.sh -f "$(FONT)" -t "$(TEXT)"
+
+curve_fitting:
+	$(SCRIPT_DIR)/curve_fitting.sh -f "$(FONT)" -t "$(TEXT)"
 
 generate_image:
-	shell_scripts/generate_image.sh -f "Ubuntu" -t 'text'
+	$(SCRIPT_DIR)/generate_image.sh -f "$(FONT)" -t "$(TEXT)"
 
 clean: clean_src clean_data
 
 clean_src:
-	rm -f src/*.pyc
-	rm -r -f src/__pycache__/
+	rm -f $(SRC_DIR)/*.pyc
+	rm -r -f $(SRC_DIR)/__pycache__/
 
 clean_data:
-	rm -f data/*.csv
-	rm -f data/*.json
-	rm -f data/images/*
+	rm -f $(DATA_DIR)/*.csv
+	rm -f $(DATA_DIR)/*.json
+	rm -f $(DATA_DIR)/images/*
