@@ -101,8 +101,10 @@ class Vector(GeometricEntity):
         '''
         assert(u is not None)
         assert(v is not None)
+        magnitude_product = u.norm() * v.norm()
+        assert(magnitude_product != 0)
         dot_product = np.dot(u.coords, v.coords)
-        dot_product_normalized = dot_product / (u.norm() * v.norm())
+        dot_product_normalized = dot_product / magnitude_product
         # why are we clipping value?
         angle = np.arccos(np.clip((dot_product_normalized), -1.0, 1.0))
         return math.degrees(angle)
@@ -228,12 +230,21 @@ class Point(GeometricEntity):
 
 
 class Segment(GeometricEntity):
-    def __init__(self, points, state=True, time=None, index=None, is_reversed=False):
+    def __init__(
+        self,
+        points,
+        state=True,
+        time=None,
+        index=None,
+        is_reversed=False
+        ):
         '''
         points: list of Points
         state: Boolean - whether self is visible or not
         time: time required for quadrotor to fly over self
         index: index of segment in .csv files
+        is_reversed: flag to indicate whether segment is reversed
+            with respect to its polynomial
         '''
         self.state = state
         self.points = points[:]
@@ -285,7 +296,7 @@ class Segment(GeometricEntity):
         Reverse order of self's Points
         '''
         self.points.reverse()
-        if not (self.is_reversed is None):
+        if self.is_reversed is not None:
             self.is_reversed = not self.is_reversed
 
     def length(self):

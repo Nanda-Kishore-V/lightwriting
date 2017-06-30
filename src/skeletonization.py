@@ -7,6 +7,7 @@ import cv2
 from constants import (
     HOME,
     VERBOSE_TEXT,
+    VERBOSE_IMAGE,
 )
 from debug_cv2 import show_and_destroy
 
@@ -14,10 +15,10 @@ def get_skeleton(image):
     threshold = threshold_mean(image)
     if VERBOSE_TEXT: print('threshold: {}'.format(threshold))
     image = image < threshold
-    show_and_destroy('image', img_as_ubyte(image))
+    if VERBOSE_IMAGE: show_and_destroy('image', img_as_ubyte(image))
     skeleton = img_as_ubyte(skeletonize(image))
 
-    show_and_destroy('skeleton', skeleton)
+    if VERBOSE_IMAGE: show_and_destroy('skeleton', skeleton)
     cv2.imwrite(HOME + 'data/images/skeleton_text.png', skeleton)
 
     return skeleton 

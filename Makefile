@@ -1,5 +1,8 @@
 all:
-	bash run.sh -f "Ubuntu" -t 'Happy'
+	bash run.sh -f "Calligraffiti" -t 'p'
+
+generate_image:
+	bash generate_image.sh -f "Ubuntu" -t '|'
 
 clean: clean_src clean_data
 
