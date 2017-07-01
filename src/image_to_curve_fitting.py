@@ -2,47 +2,24 @@ from __future__ import division, print_function
 
 import cv2
 import numpy as np
-import json
 import csv
 import matplotlib.pyplot as plt
 
 from skeletonization import get_skeleton
-from decimation import decimate
-from junction_segmentation import junction_segmentation
+from segmentation import segmentation
 from constants import (
     HOME,
     WHITE,
-    SCALING_FACTOR,
     VERBOSE_TEXT,
     VERBOSE_IMAGE,
     HEIGHT_OFFSET,
     SCALING_FACTOR,
     POST_SCALING_FACTOR,
+    TIME_PER_SEGMENT,
 )
 from geometry import Point, Segment
 
-TIME_PER_SEGMENT = 20.0
-
-def image_to_segments(filename):
-    image = cv2.imread(filename, 0)
-    width, height = image.shape
-
-    if VERBOSE_IMAGE:
-        show_and_destroy('Original Image', image)
-
-    image = get_skeleton(image)
-    print('skeletonization done')
-
-    segments = junction_segmentation(image)
-    print('junction segmentation done')
-
-    limit = 0.1 * max([len(s.points) for s in segments])
-    segments = [s for s in segments if len(s.points) > limit]
-
-    return segments, width, height
-
 def main():
-    # segments, width, height = image_to_segments(HOME + 'data/images/black_text.bmp')
     filename = HOME + 'data/images/black_text.bmp'
     image = cv2.imread(filename, 0)
     width, height = image.shape
@@ -53,8 +30,8 @@ def main():
     image = get_skeleton(image)
     print('skeletonization done')
 
-    segments = junction_segmentation(image)
-    print('junction segmentation done')
+    segments = segmentation(image)
+    print('segmentation done')
 
     limit = 0.1 * max([len(s.points) for s in segments])
     segments = [s for s in segments if len(s.points) > limit]
@@ -97,9 +74,9 @@ def main():
         output_writer.writerow(np.concatenate([[int(segment_num)], [TIME_PER_SEGMENT], p[:,0][::-1], p[:,1][::-1], [0.0] * 8, [0.0] * 8]))
 
         start_pt = [poly1d_x(0), poly1d_y(0), 0]
-        end_pt = [poly1d_x(20), poly1d_y(20), 0]
+        end_pt = [poly1d_x(TIME_PER_SEGMENT), poly1d_y(TIME_PER_SEGMENT), 0]
         start_vector = [np.polyder(poly1d_x)(0), np.polyder(poly1d_y)(0), 0]
-        end_vector = [np.polyder(poly1d_x)(20), np.polyder(poly1d_y)(20), 0]
+        end_vector = [np.polyder(poly1d_x)(TIME_PER_SEGMENT), np.polyder(poly1d_y)(TIME_PER_SEGMENT), 0]
         tangent_writer.writerow(np.concatenate([[TIME_PER_SEGMENT], start_pt, start_vector, end_pt, end_vector]))
 
         plt.annotate(str(segment_num), xy=(start_pt[1], start_pt[0]), xytext=(start_pt[1] + 1, start_pt[0] + 1),

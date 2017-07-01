@@ -6,7 +6,7 @@ import json
 
 from skeletonization import get_skeleton
 from decimation import decimate
-from junction_segmentation import junction_segmentation
+from segmentation import segmentation
 from constants import (
     HOME,
     WHITE,
@@ -29,8 +29,8 @@ def main():
     image = get_skeleton(image)
     print('skeletonization done')
 
-    segments = junction_segmentation(image)
-    print('junction segmentation done')
+    segments = segmentation(image)
+    print('segmentation done')
 
     limit = 0.1 * max([len(s.points) for s in segments])
     segments = [Segment(decimate(s.points)) for s in segments if len(s.points) > limit]
