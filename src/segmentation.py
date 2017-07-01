@@ -1,9 +1,8 @@
-from __future__ import (
-    division,
-    print_function,
-    )
+from __future__ import division, print_function
 import cv2
 import numpy as np
+
+from debug_cv2 import show_and_destroy, show_and_wait
 
 from constants import (
     HOME,
@@ -21,7 +20,13 @@ from geometry import (
 def find_white_neighbors(image, point):
     x, y = point
     width, height = image.shape
-    return [(x + dx, y + dy) for dx, dy in DIRECTIONS if 0 <= x + dx < width and 0 <= y + dy < height and image[x + dx, y + dy] == WHITE]
+    return [
+        (x + dx, y + dy)
+        for dx, dy in DIRECTIONS
+        if 0 <= x + dx < width
+        and 0 <= y + dy < height
+        and image[x + dx, y + dy] == WHITE
+    ]
 
 def is_corner(image, point):
     return len(find_white_neighbors(image, point)) == 1
@@ -39,17 +44,28 @@ def reinitialize(image, points_white):
         point_next = points_white[0]
     return point_next, segment_curr
 
-def junction_segmentation(image):
+def segmentation(image):
     img = image.copy()
     width, height = img.shape
 
-    points_white = [(i, j) for i in range(width) for j in range(height) if img[i, j] == WHITE]
-    points_white_to_be_removed = [p for p in points_white if not 1 <= len(find_white_neighbors(img, p)) < 3]
+    points_white = [
+        (i, j)
+        for i in range(width)
+        for j in range(height)
+        if img[i, j] == WHITE
+    ]
+    points_white_to_be_removed = [
+        p
+        for p in points_white
+        if not 1 <= len(find_white_neighbors(img, p)) < 3
+    ]
     for p in points_white_to_be_removed:
         img[p] = BLACK
         points_white.remove(p)
 
-    if VERBOSE_IMAGE: show_and_wait('junctions removed image', img)
+    # why doesn't this show the image?
+    if VERBOSE_IMAGE:
+        show_and_destroy('junctions removed image', img)
 
     segments = []
     point_next, segment_curr = reinitialize(img, points_white)
@@ -65,16 +81,16 @@ def junction_segmentation(image):
         if len(neighbors) == 0:
             segments.append(segment_curr)
             point_next, segment_curr = reinitialize(img, points_white)
-
         else:
             point_next = neighbors[0]
 
-    for index, segment in enumerate(segments):
-        image_segment = np.zeros(image.shape)
-        for p in segment:
-            image_segment[p] = WHITE
-        if VERBOSE_IMAGE: show_and_destroy("Image"+str(index),image_segment)
-    cv2.destroyAllWindows()
+    if True or VERBOSE_IMAGE:
+        for index, segment in enumerate(segments):
+            image_segment = np.zeros(image.shape)
+            for p in segment:
+                image_segment[p] = WHITE
+            show_and_destroy("Image"+str(index),image_segment)
+    exit()
 
     # above this line, segments are just lists of tuples
     # now, segments become a list of Segment objects, each of which contains Point objects
@@ -82,12 +98,33 @@ def junction_segmentation(image):
     if VERBOSE_TEXT:
         print('segments')
         print(*segments, sep='\n')
+
+    # now we need to detect which of the segments contain straight lines
+    # and split those lines into segments of their own
+    refined_segments = []
+    for s in segments:
+        refined_segments += segmentation_straight_lines(s)
     return segments
+
+def segmentation_straight_lines(points):
+    '''
+    points: list of Points
+
+    Splits segment into a list of Segments, each of which is either a
+    straight line, or a curve.
+
+    Returns list of Segments
+    '''
+    reduced_points = [points[0]]
+    i = 0
+    while i < len(points):
+    for p in points:
 
 def main():
     image = cv2.imread(HOME + 'data/images/skeleton_text.png', 0)
     width, height = image.shape
-    if VERBOSE_IMAGE: show_and_wait('original image', image)
+    if VERBOSE_IMAGE:
+        show_and_destroy('original image', image)
 
     points_white = [(i, j) for i in range(width) for j in range(height) if image[i, j] == WHITE]
     segments = junction_segmentation(image)
