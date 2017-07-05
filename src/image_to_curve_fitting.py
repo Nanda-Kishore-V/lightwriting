@@ -5,6 +5,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 
+from scipy.optimize import minimize_scalar
 from skeletonization import get_skeleton
 from segmentation import segmentation
 from constants import (
@@ -13,12 +14,55 @@ from constants import (
     VERBOSE_TEXT,
     VERBOSE_IMAGE,
     HEIGHT_OFFSET,
-    SCALING_FACTOR,
     POST_SCALING_FACTOR,
     TIME_PER_SEGMENT,
+    MAX_QUADROTOR_VELOCITY,
+    CAMERA_EXPOSURE_TIME_LIMIT,
 )
 from geometry import Point, Segment
 
+TIME_PER_SEGMENT = 20.0
+
+def image_to_segments(filename):
+    image = cv2.imread(filename, 0)
+    width, height = image.shape
+
+    if VERBOSE_IMAGE:
+        show_and_destroy('Original Image', image)
+
+    image = get_skeleton(image)
+    print('skeletonization done')
+
+    segments = junction_segmentation(image)
+    print('junction segmentation done')
+
+    limit = 0.1 * max([len(s.points) for s in segments])
+    segments = [s for s in segments if len(s.points) > limit]
+
+    return segments, width, height
+
+=======
+TIME_PER_SEGMENT = CAMERA_EXPOSURE_TIME_LIMIT
+
+def image_to_segments(filename):
+    image = cv2.imread(filename, 0)
+    width, height = image.shape
+
+    if VERBOSE_IMAGE:
+        show_and_destroy('Original Image', image)
+
+    image = get_skeleton(image)
+    print('skeletonization done')
+
+    segments = junction_segmentation(image)
+    print('junction segmentation done')
+
+    limit = 0.1 * max([len(s.points) for s in segments])
+    segments = [s for s in segments if len(s.points) > limit]
+
+    return segments, width, height
+
+>>>>>>> a0c0be9dc31691dd5e55533c5d2aed0f0f33b4e8
 def main():
     filename = HOME + 'data/images/black_text.bmp'
     image = cv2.imread(filename, 0)
@@ -60,26 +104,39 @@ def main():
     for segment_num, s in enumerate(segments):
         print("Segment {} is being optimized.".format(segment_num))
         points = s.points
-        x = np.array([(width - p.coords[0]) / SCALING_FACTOR + (HEIGHT_OFFSET * POST_SCALING_FACTOR) for p in points])
-        y = np.array([p.coords[1] / SCALING_FACTOR for p in points])
+        x = np.array([(width - p.coords[0]) / (SCALING_FACTOR * POST_SCALING_FACTOR) + (HEIGHT_OFFSET) for p in points])
+        y = np.array([p.coords[1] / (SCALING_FACTOR * POST_SCALING_FACTOR) for p in points])
 
         t = np.linspace(0, TIME_PER_SEGMENT, len(points))
         p = np.polyfit(t, zip(x, y), 7)
-
         poly1d_x = np.poly1d(p[:,0])
         poly1d_y = np.poly1d(p[:,1])
-        plt.plot(y, x, '.y', lw=3)
-        plt.plot([poly1d_y(time) for time in t], [poly1d_x(time) for time in t], '-g', lw=3)
 
-        output_writer.writerow(np.concatenate([[int(segment_num)], [TIME_PER_SEGMENT], p[:,0][::-1], p[:,1][::-1], [0.0] * 8, [0.0] * 8]))
+        dx = np.polyder(poly1d_x)
+        dy = np.polyder(poly1d_y)
+        velocity_sq = dx * dx + dy * dy
+
+        duration = TIME_PER_SEGMENT
+        res = minimize_scalar(-1 * velocity_sq, bounds=(0, TIME_PER_SEGMENT), method='bounded')
+        max_velocity = velocity_sq(res.x)**0.5
+
+        duration = TIME_PER_SEGMENT * max_velocity/MAX_QUADROTOR_VELOCITY
+        scaling_polynomial = np.poly1d([MAX_QUADROTOR_VELOCITY/max_velocity, 0])
+        poly1d_x = np.polyval(poly1d_x, scaling_polynomial)
+        poly1d_y = np.polyval(poly1d_y, scaling_polynomial)
+        t = np.linspace(0, duration, len(points))
+
+        output_writer.writerow(np.concatenate([[int(segment_num)], [duration], np.array(poly1d_x)[::-1], np.array(poly1d_y)[::-1], [0.0] * 8, [0.0] * 8]))
 
         start_pt = [poly1d_x(0), poly1d_y(0), 0]
-        end_pt = [poly1d_x(TIME_PER_SEGMENT), poly1d_y(TIME_PER_SEGMENT), 0]
+        end_pt = [poly1d_x(duration), poly1d_y(duration), 0]
         start_vector = [np.polyder(poly1d_x)(0), np.polyder(poly1d_y)(0), 0]
-        end_vector = [np.polyder(poly1d_x)(TIME_PER_SEGMENT), np.polyder(poly1d_y)(TIME_PER_SEGMENT), 0]
-        tangent_writer.writerow(np.concatenate([[TIME_PER_SEGMENT], start_pt, start_vector, end_pt, end_vector]))
+        end_vector = [-1*np.polyder(poly1d_x)(duration), -1*np.polyder(poly1d_y)(duration), 0]
+        tangent_writer.writerow(np.concatenate([[duration], start_pt, start_vector, end_pt, end_vector]))
 
-        plt.annotate(str(segment_num), xy=(start_pt[1], start_pt[0]), xytext=(start_pt[1] + 1, start_pt[0] + 1),
+        plt.plot(y, x, '.y', lw=3)
+        plt.plot([poly1d_y(time) for time in t], [poly1d_x(time) for time in t], '-g', lw=3)
+        plt.annotate(str(segment_num), xy=(start_pt[1], start_pt[0]), xytext=(start_pt[1] + 0.05, start_pt[0] + 0.05),
             arrowprops=dict(facecolor='white', shrink=0.05))
         plt.quiver(start_pt[1], start_pt[0], start_vector[1], start_vector[0], color='r')
         plt.quiver(end_pt[1], end_pt[0], end_vector[1], end_vector[0], color='b')
