@@ -71,7 +71,7 @@ def main():
     f = open(HOME + "data/output.csv", "r")
     csv_reader = csv.reader(f)
     first_line = next(csv_reader)
-    matrix = np.loadtxt(f, delimiter=",", skiprows=0)
+    matrix = np.loadtxt(f, delimiter=",", skiprows=0, ndmin=2)
     matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
 
     times = [sum(segment[i][1] for i in range(len(segment))) for segment in matrix]
@@ -87,7 +87,7 @@ def main():
 
         combinations = [(i,j) for i in range(len(locations)) for j in range(len(locations)) if i < j]
         distances = [distance(locations[i], locations[j]) for i, j in combinations]
-        is_intersecting = map(lambda x : x < COLLISION_DIST * POST_SCALING_FACTOR, distances)
+        is_intersecting = map(lambda x : x < COLLISION_DIST, distances)
         for index, elem in enumerate(is_intersecting):
             if elem:
                 intersecting_pairs.add(combinations[index])
@@ -107,14 +107,14 @@ def main():
         with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(segment_num), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
-            initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10]/POST_SCALING_FACTOR, 0))
-            heights.append(segment[0][2]/POST_SCALING_FACTOR)
+            initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], 0))
+            heights.append(segment[0][2])
             for piece in segment:
                 # temp = piece[10:18].copy()
                 piece[18:26] = piece[2:10].copy()
                 # piece[10:18] = temp
                 piece[2:10] = [0 for _ in range(8)]
-                writer.writerow(np.concatenate([[piece[1]], [(i/POST_SCALING_FACTOR) for i in piece[2:]]]))
+                writer.writerow(np.concatenate([[piece[1]], [(i) for i in piece[2:]]]))
 
     if VERBOSE_TEXT: print("InitialPositions: " + str(initialPositions))
     if VERBOSE_TEXT: print("Heights: " + str(heights))
