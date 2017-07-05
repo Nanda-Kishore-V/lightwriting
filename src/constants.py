@@ -20,9 +20,11 @@ DIRECTIONS.remove((0,0))
 del offset_list
 
 SIZE_OF_QUAD = 0.1 # in m
-MAX_QUADROTOR_VELOCITY = 0.1 # in m/s
+MAX_QUADROTOR_VELOCITY = 0.25 # in m/s
 MAX_PIECEWISE_POLYNOMIALS = 30
 CAMERA_EXPOSURE_TIME_LIMIT = 20 # in s
+#Distance of camera from the first plane
+CAMERA_DISTANCE = 1 # in m
 
 ARENA_WIDTH = 6.0 # in m
 ARENA_HEIGHT = 1.5 # in m

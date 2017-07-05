@@ -39,6 +39,12 @@ def distance(point1, point2):
 
 def return_location(segment, time):
     shift_times = [segment[i][1] for i in range(len(segment))]
+    total_time = sum(shift_times)
+    if time > total_time:
+        Px = Polynomial(*segment[-1][2:10])
+        Py = Polynomial(*segment[-1][10:18])
+        Pz = Polynomial(*segment[-1][18:26])
+        return Px(total_time), Py(total_time), Pz(total_time)
     s = 0
     for index, t in enumerate(shift_times):
         s += t
