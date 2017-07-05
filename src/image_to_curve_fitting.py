@@ -20,26 +20,6 @@ from constants import (
 )
 from geometry import Point, Segment
 
-TIME_PER_SEGMENT = 20.0
-
-def image_to_segments(filename):
-    image = cv2.imread(filename, 0)
-    width, height = image.shape
-
-    if VERBOSE_IMAGE:
-        show_and_destroy('Original Image', image)
-
-    image = get_skeleton(image)
-    print('skeletonization done')
-
-    segments = junction_segmentation(image)
-    print('junction segmentation done')
-
-    limit = 0.1 * max([len(s.points) for s in segments])
-    segments = [s for s in segments if len(s.points) > limit]
-
-    return segments, width, height
-
 TIME_PER_SEGMENT = CAMERA_EXPOSURE_TIME_LIMIT
 
 def image_to_segments(filename):
