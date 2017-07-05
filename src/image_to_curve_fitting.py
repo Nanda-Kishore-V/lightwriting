@@ -42,21 +42,7 @@ def image_to_segments(filename):
 
 def main():
     filename = HOME + 'data/images/black_text.bmp'
-    image = cv2.imread(filename, 0)
-    width, height = image.shape
-
-    if VERBOSE_IMAGE:
-        show_and_destroy('Original Image', image)
-
-    image = get_skeleton(image)
-    print('skeletonization done')
-
-    segments = segmentation(image)
-    print('segmentation done')
-
-    limit = 0.1 * max([len(s.points) for s in segments])
-    segments = [s for s in segments if len(s.points) > limit]
-    num_segments = len(segments)
+    segments, width, height = image_to_segments(filename)
     print("Number of segments: {}".format(len(segments)))
 
     out_file = open(HOME + "data/output.csv", "w")
@@ -65,7 +51,7 @@ def main():
     temp_y = ["y^"+str(degree) for degree in range(8)]
     temp_z = ["z^"+str(degree) for degree in range(8)]
     temp_yaw = ["yaw^"+str(degree) for degree in range(8)]
-    output_writer.writerow(np.concatenate([[int(num_segments)],['duration'], temp_x, temp_y, temp_z, temp_yaw]))
+    output_writer.writerow(np.concatenate([[len(segments)],['duration'], temp_x, temp_y, temp_z, temp_yaw]))
 
     tangent_file = open(HOME + "data/tangents.csv", "w")
     tangent_writer = csv.writer(tangent_file)
