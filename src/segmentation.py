@@ -115,10 +115,7 @@ def segmentation_straight_lines(points):
 
     Returns list of Segments
     '''
-    reduced_points = [points[0]]
-    i = 0
-    while i < len(points):
-    for p in points:
+    pass
 
 def main():
     image = cv2.imread(HOME + 'data/images/skeleton_text.png', 0)
@@ -127,7 +124,7 @@ def main():
         show_and_destroy('original image', image)
 
     points_white = [(i, j) for i in range(width) for j in range(height) if image[i, j] == WHITE]
-    segments = junction_segmentation(image)
+    segments = segmentation(image)
     for index, s in enumerate(segments):
         for wp in points_white:
             if wp in s:
