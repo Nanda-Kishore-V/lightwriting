@@ -15,7 +15,6 @@ from constants import (
     VERBOSE_IMAGE,
     HEIGHT_OFFSET,
     POST_SCALING_FACTOR,
-    TIME_PER_SEGMENT,
     MAX_QUADROTOR_VELOCITY,
     CAMERA_EXPOSURE_TIME_LIMIT,
 )
@@ -41,7 +40,6 @@ def image_to_segments(filename):
 
     return segments, width, height
 
-=======
 TIME_PER_SEGMENT = CAMERA_EXPOSURE_TIME_LIMIT
 
 def image_to_segments(filename):
@@ -62,7 +60,6 @@ def image_to_segments(filename):
 
     return segments, width, height
 
->>>>>>> a0c0be9dc31691dd5e55533c5d2aed0f0f33b4e8
 def main():
     filename = HOME + 'data/images/black_text.bmp'
     image = cv2.imread(filename, 0)
