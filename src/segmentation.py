@@ -90,7 +90,6 @@ def segmentation(image):
             for p in segment:
                 image_segment[p] = WHITE
             show_and_destroy("Image"+str(index),image_segment)
-    exit()
 
     # above this line, segments are just lists of tuples
     # now, segments become a list of Segment objects, each of which contains Point objects
@@ -101,9 +100,11 @@ def segmentation(image):
 
     # now we need to detect which of the segments contain straight lines
     # and split those lines into segments of their own
+    '''
     refined_segments = []
     for s in segments:
         refined_segments += segmentation_straight_lines(s)
+    '''
     return segments
 
 def segmentation_straight_lines(points):

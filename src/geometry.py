@@ -1,10 +1,10 @@
 from __future__ import division, print_function
 
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 import numpy as np
 import operator
 import math
-import copy
 import json
 
 from constants import (
@@ -90,7 +90,7 @@ class Vector(GeometricEntity):
         '''
         Return unit Vector of self without changing self
         '''
-        u = copy.deepcopy(self)
+        u = deepcopy(self)
         u.normalize()
         return u
 
@@ -121,9 +121,9 @@ class Point(GeometricEntity):
             assert len(self.coords) == len(self.tgt.coords), \
                 'Point and its tangent have different dimensions'
 
-    def __repr__(self, end='', sep='\t'):
+    def __repr__(self, end='\n', sep='\n'):
         my_string = 'Coord: ' + str(self.coords)
-        if self.tgt is not None:
+        if False and self.tgt is not None:
             my_string += sep + 'Tgt: ' + str(self.tgt)
         my_string += end
         return my_string
@@ -252,9 +252,10 @@ class Segment(GeometricEntity):
         self.index = index
         self.is_reversed = is_reversed
 
-    def __repr__(self, sep='\t', end='\n'):
+    def __repr__(self, sep='\n', end='\n'):
         return 'Index: ' + str(self.index) + sep \
                 + 'Time: ' + str(self.time) + sep \
+                + 'Is_reversed: ' + str(self.is_reversed) + sep \
                 + 'Length: ' + str(self.length()) + sep \
                 + 'State: ' + str(self.state) + sep \
                 + 'Pts: ' + str(self.points) + end
@@ -309,7 +310,7 @@ class Path(GeometricEntity):
     def __init__(self, segments):
         self.segments = segments[:]
 
-    def __repr__(self, sep='\t', end='\n'):
+    def __repr__(self, sep='\n', end='\n'):
         return 'Time:' + str(self.time()) + sep \
             + 'Length: ' + str(self.length()) + sep \
             + 'Pieces: ' + str(self.pieces()) \
@@ -364,10 +365,16 @@ class Path(GeometricEntity):
         '''
         if a is p.segments[0].points[0]:
             print('reversed first path')
+            print('original path: ', p)
+            p = deepcopy(p)
             p.reverse()
+            print('reversed path: ', p)
         if b is q.segments[-1].points[-1]:
             print('reversed second path')
+            print('original path: ', q)
+            q = deepcopy(q)
             q.reverse()
+            print('reversed path: ', q)
 
         distance = Point.distance(a, b)
         time = distance / (MAX_QUADROTOR_VELOCITY)

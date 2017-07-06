@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from scipy.optimize import minimize_scalar
 from skeletonization import get_skeleton
-from junction_segmentation import junction_segmentation
+from segmentation import segmentation
 from constants import (
     HOME,
     WHITE,
@@ -33,7 +33,7 @@ def image_to_segments(filename):
     image = get_skeleton(image)
     print('skeletonization done')
 
-    segments = junction_segmentation(image)
+    segments = segmentation(image)
     print('junction segmentation done')
 
     limit = 0.1 * max([len(s.points) for s in segments])
@@ -100,7 +100,6 @@ def main():
         # piece_y = [end_y] + [0.0] * 7
         #
         # output_writer.writerow(np.concatenate([[int(segment_num)], [time_end_segment], piece_x, piece_y, [0.0] * 16]))
-
 
         start_pt = [poly1d_x(0), poly1d_y(0), 0]
         end_pt = [poly1d_x(duration), poly1d_y(duration), 0]
