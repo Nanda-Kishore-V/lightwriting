@@ -22,7 +22,6 @@ from geometry import (
     Point,
 )
 
-#ROS_WS = "/home/nanda/Documents/Intern/crazyswarm/ros_ws/src/crazyswarm/"
 ROS_WS = HOME + '../crazyswarm/ros_ws/src/crazyswarm/'
 
 def second_largest(numbers):
@@ -74,7 +73,7 @@ def get_color(node, intersecting_pairs, color_of_segments):
     return None
 
 def main():
-    f = open(HOME + "data/output.csv", "r")
+    f = open(HOME + "data/temp.csv", "r")
     csv_reader = csv.reader(f)
     first_line = next(csv_reader)
     matrix = np.loadtxt(f, delimiter=",", skiprows=0, ndmin=2)

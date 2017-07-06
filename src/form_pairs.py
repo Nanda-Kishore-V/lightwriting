@@ -23,7 +23,7 @@ from geometry import (
 
 def form_pairs(
     file_ip,
-    file_op=None,
+    file_op,
     max_time=CAMERA_EXPOSURE_TIME_LIMIT,
     max_pieces=MAX_PIECEWISE_POLYNOMIALS,
 ):
@@ -57,14 +57,19 @@ def form_pairs(
             print('Path: ', p)
             exit()
 
-    print('Paths before forming pairs: ', len(paths))
-    print('Paths:')
-    print(*paths, sep='\n')
+    if VERBOSE_TEXT:
+        print('Paths before forming pairs: ', len(paths))
+        print('Paths:')
+        print(*paths, sep='\n')
+        raw_input('-' * 80)
 
     paths_done = []
     m = MetricSurface()
     # form pairs now
     while paths:
+        if VERBOSE_TEXT:
+            raw_input('-' * 80)
+            print('len of paths: ', len(paths))
         path_smallest = paths.pop(0)
         metric_max = float('-inf')
         index_best = None
@@ -80,18 +85,31 @@ def form_pairs(
                 path_best = path
 
         if index_best is None:
+            if VERBOSE_TEXT:
+                print('No partner could be found for path_smallest: ', path_smallest)
             paths_done.append(path_smallest)
+            if VERBOSE_TEXT:
+                print('path_smallest was moved to paths_done')
             continue
+        if VERBOSE_TEXT:
+            print('Combining path_smallest: ', path_smallest)
+            print('With path with index_best: ', paths[index_best])
         del paths[index_best]
         # optimize later to insert path_new into correct position
         paths.append(path_best)
-        paths.sort(key = lambda p: p.time())
+        if VERBOSE_TEXT:
+            print('Newly added path is: ', path_best)
+        paths.sort(key = lambda p: p.time)
 
+    if VERBOSE_TEXT:
+        raw_input('-' * 80)
     paths = paths_done
-    paths.sort(key = lambda p: p.time())
-    print('Paths after forming pairs: ', len(paths))
-    print('Paths:')
-    print(*paths, sep='\n')
+    paths.sort(key = lambda p: p.time)
+    if VERBOSE_TEXT:
+        print('Paths after forming pairs: ', len(paths))
+        print('Paths:')
+        print(*paths, sep='\n')
+        raw_input('-' * 80)
 
     for i, p in enumerate(paths):
         x = []
@@ -109,8 +127,6 @@ def form_pairs(
 
     path_dicts = [Path.to_dict(p) for p in paths]
     if VERBOSE_TEXT: print(*path_dicts, sep='\n')
-    if file_op is None:
-        file_op = file_ip
     with open(file_op, 'w') as f:
         json.dump(path_dicts, f)
 

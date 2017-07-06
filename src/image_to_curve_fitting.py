@@ -92,6 +92,7 @@ def main():
 
         output_writer.writerow(np.concatenate([[int(segment_num)], [duration], np.array(poly1d_x)[::-1], np.array(poly1d_y)[::-1], [0.0] * 8, [0.0] * 8]))
 
+        '''
         destination_x = 0.5
         end_x = poly1d_x(duration)
         end_y = poly1d_y(duration)
@@ -100,6 +101,7 @@ def main():
         piece_y = [end_y] + [0.0] * 7
 
         output_writer.writerow(np.concatenate([[int(segment_num)], [time_end_segment], piece_x, piece_y, [0.0] * 16]))
+        '''
 
 
         start_pt = [poly1d_x(0), poly1d_y(0), 0]
