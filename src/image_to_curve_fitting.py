@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from scipy.optimize import minimize_scalar
 from skeletonization import get_skeleton
-from junction_segmentation import junction_segmentation
+from segmentation import segmentation
 from constants import (
     HOME,
     WHITE,
@@ -33,7 +33,7 @@ def image_to_segments(filename):
     image = get_skeleton(image)
     print('skeletonization done')
 
-    segments = junction_segmentation(image)
+    segments = segmentation(image)
     print('junction segmentation done')
 
     limit = 0.1 * max([len(s.points) for s in segments])
