@@ -84,7 +84,7 @@ def segmentation(image):
         else:
             point_next = neighbors[0]
 
-    if True or VERBOSE_IMAGE:
+    if VERBOSE_IMAGE:
         for index, segment in enumerate(segments):
             image_segment = np.zeros(image.shape)
             for p in segment:
