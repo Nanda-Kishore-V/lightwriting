@@ -51,7 +51,17 @@ def form_pairs(
 
     paths.sort(key = lambda p: p.time)
 
-    paths_combined = []
+    for p in paths:
+        if p.time() > max_time or p.pieces() > max_pieces:
+            print('Error! Path is initially to long in terms of time or pieces')
+            print('Path: ', p)
+            exit()
+
+    print('Paths before forming pairs: ', len(paths))
+    print('Paths:')
+    print(*paths, sep='\n')
+
+    paths_done = []
     m = MetricSurface()
     # form pairs now
     while paths:
@@ -59,7 +69,6 @@ def form_pairs(
         metric_max = float('-inf')
         index_best = None
         path_best = None
-        candidates = []
         for i, p in enumerate(paths):
             metric, points_end = Path.select_pair(path_smallest, p, m)
             path = Path.join(path_smallest, p, *points_end)
@@ -71,14 +80,19 @@ def form_pairs(
                 path_best = path
 
         if index_best is None:
-            paths_combined.append(path_smallest)
+            paths_done.append(path_smallest)
             continue
         del paths[index_best]
         # optimize later to insert path_new into correct position
         paths.append(path_best)
         paths.sort(key = lambda p: p.time())
 
-    paths = paths_combined
+    paths = paths_done
+    paths.sort(key = lambda p: p.time())
+    print('Paths after forming pairs: ', len(paths))
+    print('Paths:')
+    print(*paths, sep='\n')
+
     for i, p in enumerate(paths):
         x = []
         y = []
