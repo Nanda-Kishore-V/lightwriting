@@ -39,7 +39,7 @@ def return_corner(image, points):
 
 def reinitialize(image, points_white):
     point_next = return_corner(image, points_white)
-    segment_curr = [] 
+    segment_curr = []
     if point_next is None and points_white:
         point_next = points_white[0]
     return point_next, segment_curr
@@ -84,7 +84,7 @@ def segmentation(image):
         else:
             point_next = neighbors[0]
 
-    if True or VERBOSE_IMAGE:
+    if VERBOSE_IMAGE:
         for index, segment in enumerate(segments):
             image_segment = np.zeros(image.shape)
             for p in segment:
