@@ -29,8 +29,7 @@ def form_pairs(
 ):
 
     with open(file_ip, "rb") as f:
-        data = np.genfromtxt(f, dtype= float, delimiter=',')
-        data = np.delete(data, (0), axis = 0)
+        data = np.loadtxt(f, delimiter=',', skiprows=1, ndmin=2)
 
     paths = []
     for index, d in enumerate(data):
@@ -121,8 +120,7 @@ def form_pairs(
             y.append(s.points[1].coords[1])
         plt.figure(i)
         plt.scatter(y, x, c='r')
-        plt.xlim([0, 100])
-        plt.ylim([0, 100])
+        plt.axis('equal')
         plt.show()
 
     path_dicts = [Path.to_dict(p) for p in paths]
@@ -131,7 +129,7 @@ def form_pairs(
         json.dump(path_dicts, f)
 
     with open(HOME + 'data/output.csv') as f:
-        matrix = np.loadtxt(f, delimiter=',', skiprows=1)
+        matrix = np.loadtxt(f, delimiter=',', skiprows=1, ndmin=2)
         matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
 
     file_temp = HOME + 'data/temp.csv'
