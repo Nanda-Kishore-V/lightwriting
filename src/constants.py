@@ -25,13 +25,17 @@ MAX_PIECEWISE_POLYNOMIALS = 30
 CAMERA_EXPOSURE_TIME_LIMIT = 20 # in s
 #Distance of camera from the first plane
 CAMERA_DISTANCE = 1 # in m
+CAMERA_Y = 2.5 # in m
+CAMERA_Z = 3 # in m
 
 ARENA_WIDTH = 6.0 # in m
 ARENA_HEIGHT = 1.5 # in m
 
 HEIGHT_OFFSET = 1.0 # in m
-X_OFFSET = (3 * 0.02 + 1.414 * SIZE_OF_QUAD) # in m
-COLLISION_DIST = (3 * 0.02 + 1.414 * SIZE_OF_QUAD) # in m
+# X_OFFSET = (3 * 0.02 + 1.414 * SIZE_OF_QUAD) # in m
+X_OFFSET = 0.3 # in m
+# COLLISION_DIST = (3 * 0.02 + 1.414 * SIZE_OF_QUAD) # in m
+COLLISION_DIST = 0.3 # in m
 
 SCALING_FACTOR = 10.0
 POST_SCALING_FACTOR = 50.0

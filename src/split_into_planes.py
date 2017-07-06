@@ -15,6 +15,7 @@ from constants import (
     X_OFFSET,
     POST_SCALING_FACTOR,
     COLLISION_DIST,
+    CAMERA_DISTANCE,
 )
 
 from geometry import (
@@ -81,11 +82,22 @@ def main():
     matrix = np.split(matrix, np.where(np.diff(matrix[:,0]))[0]+1)
 
     times = [sum(segment[i][1] for i in range(len(segment))) for segment in matrix]
-    dt = min(times)/100.0
+    dt = min(times)/500.0
     t = 0
     limit = max(times)
 
     intersecting_pairs = Set([])
+    locations = []
+    for segment in matrix:
+        locations.append([0, segment[0][10], 0])
+
+    combinations = [(i,j) for i in range(len(locations)) for j in range(len(locations)) if i < j]
+    distances = [distance(locations[i], locations[j]) for i, j in combinations]
+    is_intersecting = map(lambda x : x < COLLISION_DIST, distances)
+    for index, elem in enumerate(is_intersecting):
+        if elem:
+            intersecting_pairs.add(combinations[index])
+
     while t <= limit:
         locations = []
         for segment in matrix:
@@ -105,6 +117,7 @@ def main():
     for node in range(len(matrix)):
         color_of_segments[node] = get_color(node, intersecting_pairs, color_of_segments)
     if VERBOSE_TEXT: print(color_of_segments)
+    print("Number of planes: {}".format(max(color_of_segments.values())+1))
 
     initialPositions = []
     heights = []
