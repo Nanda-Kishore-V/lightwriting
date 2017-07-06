@@ -28,8 +28,8 @@ CAMERA_DISTANCE = 1 # in m
 CAMERA_Y = 2.5 # in m
 CAMERA_Z = 3 # in m
 
-ARENA_WIDTH = 6.0 # in m
-ARENA_HEIGHT = 1.5 # in m
+ARENA_WIDTH = 5.0 # in m
+ARENA_HEIGHT = 1 # in m
 
 HEIGHT_OFFSET = 1.0 # in m
 # X_OFFSET = (3 * 0.02 + 1.414 * SIZE_OF_QUAD) # in m
