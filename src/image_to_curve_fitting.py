@@ -8,11 +8,10 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize_scalar
 from skeletonization import get_skeleton
 from segmentation import segmentation
-from constants import (
-    HOME,
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT, VERBOSE_IMAGE
+from constants_crazyswarm import (
     WHITE,
-    VERBOSE_TEXT,
-    VERBOSE_IMAGE,
     HEIGHT_OFFSET,
     POST_SCALING_FACTOR,
     SCALING_FACTOR,

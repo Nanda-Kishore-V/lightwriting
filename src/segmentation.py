@@ -4,13 +4,12 @@ import numpy as np
 
 from debug_cv2 import show_and_destroy, show_and_wait
 
-from constants import (
-    HOME,
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT, VERBOSE_IMAGE
+from constants_crazyswarm import (
     DIRECTIONS,
     WHITE,
     BLACK,
-    VERBOSE_TEXT,
-    VERBOSE_IMAGE,
 )
 from geometry import (
     Point,

@@ -7,9 +7,9 @@ import numpy as np
 import csv
 import json
 
-from constants import (
-    HOME,
-    VERBOSE_TEXT,
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT
+from constants_crazyswarm import (
     MAX_QUADROTOR_VELOCITY,
 )
 from geometry import (

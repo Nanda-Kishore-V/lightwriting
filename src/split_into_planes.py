@@ -8,16 +8,15 @@ import json
 import matplotlib.pyplot as plt
 
 from sets import Set
-from constants import (
-    HOME,
-    VERBOSE_TEXT,
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT
+from constants_crazyswarm import (
     HEIGHT_OFFSET,
     X_OFFSET,
     POST_SCALING_FACTOR,
     COLLISION_DIST,
     CAMERA_DISTANCE,
 )
-
 from geometry import (
     Segment,
     Point,

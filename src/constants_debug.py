@@ -1,0 +1,2 @@
+VERBOSE_IMAGE = False
+VERBOSE_TEXT = False

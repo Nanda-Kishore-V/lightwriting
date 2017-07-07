@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 import json
 import csv
 
-from constants import (
-    HOME,
-    VERBOSE_TEXT,
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT
+from constants_crazyswarm import (
     MAX_PIECEWISE_POLYNOMIALS,
     CAMERA_EXPOSURE_TIME_LIMIT,
     MAX_QUADROTOR_VELOCITY,

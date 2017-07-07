@@ -2,10 +2,7 @@ from __future__ import division, print_function
 
 import numpy as np
 
-from constants import (
-        VERBOSE_TEXT,
-        VERBOSE_IMAGE,
-    )
+from constants_debug import VERBOSE_TEXT, VERBOSE_IMAGE
 from geometry import (
         Point,
     )

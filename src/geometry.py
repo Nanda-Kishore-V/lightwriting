@@ -7,8 +7,8 @@ import operator
 import math
 import json
 
-from constants import (
-    VERBOSE_TEXT,
+from constants_debug import VERBOSE_TEXT
+from constants_crazyswarm import (
     MAX_QUADROTOR_VELOCITY,
     WHITE,
     POST_SCALING_FACTOR,

@@ -7,12 +7,11 @@ import json
 from skeletonization import get_skeleton
 from decimation import decimate
 from segmentation import segmentation
-from constants import (
-    HOME,
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT, VERBOSE_IMAGE
+from constants_crazyswarm import (
     WHITE,
     SCALING_FACTOR,
-    VERBOSE_TEXT,
-    VERBOSE_IMAGE,
     HEIGHT_OFFSET,
     SCALING_FACTOR,
     POST_SCALING_FACTOR,

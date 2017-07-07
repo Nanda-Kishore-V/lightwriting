@@ -4,11 +4,8 @@ from skimage.util import invert
 from skimage import img_as_ubyte
 import cv2
 
-from constants import (
-    HOME,
-    VERBOSE_TEXT,
-    VERBOSE_IMAGE,
-)
+from constants_env import HOME
+from constants_debug import VERBOSE_TEXT, VERBOSE_IMAGE
 from debug_cv2 import show_and_destroy
 
 def get_skeleton(image):
