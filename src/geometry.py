@@ -206,6 +206,36 @@ class Point(GeometricEntity):
         return distance_perpendicular
 
     @staticmethod
+    def distance_between_lines(line1_endpoints, line2_endpoints):
+        '''
+        Returns the distance 2 (possible skew) lines described by their
+        end points
+
+        line1_endpoints: tuple of 2 end Points of line 1
+        line2_endpoints: tuple of 2 end Points of line 2
+        '''
+        assert(len(line1_endpoints) == 2)
+        assert(len(line2_endpoints) == 2)
+
+        A = np.array(line1_endpoints[0].coords)
+        B = np.array(line1_endpoints[1].coords)
+        C = np.array(line2_endpoints[0].coords)
+        D = np.array(line2_endpoints[1].coords)
+
+        assert(len(A) == len(B) == len(C) == len(D))
+
+        direction_line1 = A - B
+        direction_line2 = C - D
+        normal = np.cross(direction_line1, direction_line2)
+        if np.linalg.norm(normal) == 0:
+            # line1 and line2 are coincident
+            return 0.0
+        AC = A - C
+        distance = abs(np.dot(AC, normal) / np.linalg.norm(normal))
+
+        return distance
+
+    @staticmethod
     def to_image(points, width=None, height=None):
         '''
         Show points as WHITE pixels on BLACK background

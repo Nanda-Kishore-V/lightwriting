@@ -125,11 +125,33 @@ def test_path():
     for index,s in enumerate(p3.segments):
         print('index: {}, is_reversed: {}'.format(index, s.is_reversed))
 
+def test_skew_lines():
+    '''
+    Let AB and CD be lines in 3D.
+    This tests Point.distance_between_lines()
+    '''
+
+    '''
+    A = Point((0, 0, 0))
+    B = Point((0, 0, 1))
+
+    C = Point((1, 1, 0))
+    D = Point((1, 0, 1))
+    '''
+    A = Point((0, 0, 3))
+    B = Point((1, 1, 3))
+
+    C = Point((1, 0, 3))
+    D = Point((0, 1, 3))
+
+    distance = Point.distance_between_lines((A, B), (C, D))
+    print(distance)
 def main():
     # test_vector()
     #test_point()
     # test_segment()
-    test_path()
+    #test_path()
+    test_skew_lines()
     # print('All tests are commented')
 
 if __name__ == '__main__':
