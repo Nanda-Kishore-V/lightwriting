@@ -1,9 +1,5 @@
 1) Use homogeneous coordinates after position of camera is known.
-2) Change output of generation.py and input of form_pairs.py to .JSON
-3) Remove unnecessary small straight lines formed by skeletonization at corners of letters
-4) Unify the arena constants (3000px by 750px) present in run.sh and src/constants.py
-5) Fix reversal of segments
-6) Change decimation to detect straight lines and segment image accordingly
+2) Unify the arena constants (3000px by 750px) present in run.sh and src/constants.py
+3) Add cmake file to install dependencies
 
-finish by Friday - simulation and find camera
-last week - run demos on h/w
+last week - find camera, run demos on h/w
