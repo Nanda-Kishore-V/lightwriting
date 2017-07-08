@@ -121,7 +121,7 @@ def main():
     heights = []
     for segment_num, segment in enumerate(matrix):
         # with open(ROS_WS + 'scripts/traj/plane{0}_quad{1}.csv'.format(color_of_segments[segment_num], segment_num), "w") as filename:
-        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(segment_num), 'w') as filename:
+        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(segment_num + 1), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
             initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], 0))
@@ -140,13 +140,13 @@ def main():
     with open(ROS_WS + "launch/crazyflies.yaml", "w") as filename:
         filename.write("crazyflies:\n")
         for segment_num in range(len(matrix)):
-            filename.write(' - id: ' + str(segment_num) + '\n')
+            filename.write(' - id: ' + str(segment_num + 1) + '\n')
             filename.write('   channel: {0}\n'.format(channel[segment_num%3]))
             filename.write('   initialPosition: [{0}, {1}, {2}]\n'.format(*initialPositions[segment_num]))
 
     with open(ROS_WS + "launch/heights.yaml", "w") as filename:
         for segment_num in range(len(matrix)):
-            filename.write('{0}: {1}\n'.format(segment_num, heights[segment_num]))
+            filename.write('{0}: {1}\n'.format(segment_num + 1, heights[segment_num]))
 
 if __name__ == "__main__":
     main()
