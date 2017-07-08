@@ -8,15 +8,6 @@ import math
 import json
 
 from constants_debug import VERBOSE_TEXT
-from constants_crazyswarm import (
-    MAX_QUADROTOR_VELOCITY,
-    WHITE,
-    POST_SCALING_FACTOR,
-)
-
-# from debug_cv2 import (
-#     show_and_destroy
-# )
 
 class GeometricEntity():
     __metaclass__ = ABCMeta
@@ -235,30 +226,6 @@ class Point(GeometricEntity):
 
         return distance
 
-    @staticmethod
-    def to_image(points, width=None, height=None):
-        '''
-        Show points as WHITE pixels on BLACK background
-
-        points: list of Points
-        width: width of image generated
-        height: height of image generated
-        '''
-        x_coords = [p.coords[0] for p in points]
-        y_coords = [p.coords[1] for p in points]
-        width = max(x_coords) + 1 if width is None else width
-        height = max(y_coords) + 1 if height is None else height
-
-        assert isinstance(width, (int, long)) and width > 0
-        assert isinstance(height, (int, long)) and height > 0
-
-        image = np.zeros((width, height), dtype=np.uint8)
-        for p in points:
-            image[p.coords] = WHITE
-
-        show_and_destroy('points as image', image)
-
-
 class Segment(GeometricEntity):
     def __init__(
         self,
@@ -388,7 +355,7 @@ class Path(GeometricEntity):
         return sum(len(s.points) - 1 for s in self.segments)
 
     @staticmethod
-    def join(p, q, a, b):
+    def join(p, q, a, b, velocity=None):
         '''
         Return Path formed by joining Paths p and q
         at joining Points a and b of p and q respectively
@@ -407,8 +374,11 @@ class Path(GeometricEntity):
             print('reversed path: ', q)
 
         distance = Point.distance(a, b)
-        time = distance / (MAX_QUADROTOR_VELOCITY)
-        segments_combined = p.segments + [Segment([a, b], False, time, is_reversed=None)] + q.segments
+        if velocity is not None:
+            time = distance / velocity
+            segments_combined = p.segments + [Segment([a, b], False, time, is_reversed=None)] + q.segments
+        else:
+            segments_combined = p.segments + [Segment([a, b], False, is_reversed=None)] + q.segments
         return Path(segments_combined)
 
     def reverse(self):

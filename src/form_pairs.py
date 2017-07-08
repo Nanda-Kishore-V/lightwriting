@@ -75,7 +75,7 @@ def form_pairs(
         path_best = None
         for i, p in enumerate(paths):
             metric, points_end = Path.select_pair(path_smallest, p, m)
-            path = Path.join(path_smallest, p, *points_end)
+            path = Path.join(path_smallest, p, *points_end, velocity=MAX_QUADROTOR_VELOCITY)
             if path.time() > max_time or path.pieces() > max_pieces:
                 continue
             if metric > metric_max:

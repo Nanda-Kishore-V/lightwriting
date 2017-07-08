@@ -3,9 +3,8 @@ from __future__ import division, print_function
 import numpy as np
 
 from constants_debug import VERBOSE_TEXT, VERBOSE_IMAGE
-from geometry import (
-        Point,
-    )
+from geometry import Point
+import debug_cv2
 
 def decimate(
         points,
@@ -49,7 +48,8 @@ def decimate(
         epsilon += epsilon_increment
         if VERBOSE_TEXT: print('We need to keep decimating. New epsilon is {}'.format(epsilon))
         if point_removed:
-            if VERBOSE_IMAGE: Point.to_image(points_reduced)
+            if VERBOSE_IMAGE:
+                debug_cv2.to_image([p.coords for p in points_reduced])
         return decimate(points, epsilon=epsilon)
 
     return points_reduced
