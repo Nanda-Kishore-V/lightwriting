@@ -1,8 +1,7 @@
 1) Use homogeneous coordinates after position of camera is known.
 2) Unify the arena constants (3000px by 750px) present in run.sh and src/constants.py
-3) Add cmake file to install dependencies
+3) Write a README with instructions to install dependencies
 4) We added vicon_sdk to our bitbucket repo. Remove this before uploading to public
 5) Decide how to get from floor to start positions and end positions back to floor
 6) Find how to turn LEDs on and off
 7) Learn to use the camera
-8) Start index of trajectory files with 1, instead of 0
