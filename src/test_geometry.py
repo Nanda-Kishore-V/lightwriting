@@ -115,7 +115,7 @@ def test_path():
     print('p2_new', p2_new)
 
     metric, (a, b) = Path.select_pair(p1, p2, MetricSurface())
-    p3 = Path.join(p1, p2, a, b)
+    p3 = Path.join(p1, p2, a, b, velocity=3)
     print('p3', p3)
     for index,s in enumerate(p3.segments):
         print('index: {}, is_reversed: {}'.format(index, s.is_reversed))

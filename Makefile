@@ -2,7 +2,7 @@ SRC_DIR=src
 SCRIPT_DIR=shell_scripts
 DATA_DIR=data
 
-TEXT=Mary had a\nlittle lamb!
+TEXT=USC
 FONT=Ubuntu
 
 .PHONY: all

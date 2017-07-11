@@ -355,7 +355,7 @@ class Path(GeometricEntity):
         return sum(len(s.points) - 1 for s in self.segments)
 
     @staticmethod
-    def join(p, q, a, b, velocity=None):
+    def join(p, q, a, b, velocity=None, pause_time=0):
         '''
         Return Path formed by joining Paths p and q
         at joining Points a and b of p and q respectively
@@ -374,11 +374,12 @@ class Path(GeometricEntity):
             print('reversed path: ', q)
 
         distance = Point.distance(a, b)
-        if velocity is not None:
-            time = distance / velocity
-            segments_combined = p.segments + [Segment([a, b], False, time, is_reversed=None)] + q.segments
-        else:
-            segments_combined = p.segments + [Segment([a, b], False, is_reversed=None)] + q.segments
+	time = distance / velocity
+	segments_combined = p.segments
+        segments_combined += [Segment([a, a], False, pause_time, is_reversed=None)]
+        segments_combined += [Segment([a, b], False, time, is_reversed=None)]
+        segments_combined += [Segment([b, b], False, pause_time, is_reversed=None)]
+        segments_combined += q.segments
         return Path(segments_combined)
 
     def reverse(self):

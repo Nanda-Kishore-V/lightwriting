@@ -12,6 +12,7 @@ from constants_crazyswarm import (
     MAX_PIECEWISE_POLYNOMIALS,
     CAMERA_EXPOSURE_TIME_LIMIT,
     MAX_QUADROTOR_VELOCITY,
+    HOVER_PAUSE_TIME,
 )
 from geometry import (
     Vector,
@@ -75,7 +76,7 @@ def form_pairs(
         path_best = None
         for i, p in enumerate(paths):
             metric, points_end = Path.select_pair(path_smallest, p, m)
-            path = Path.join(path_smallest, p, *points_end, velocity=MAX_QUADROTOR_VELOCITY)
+            path = Path.join(path_smallest, p, *points_end, velocity=MAX_QUADROTOR_VELOCITY, pause_time=HOVER_PAUSE_TIME)
             if path.time() > max_time or path.pieces() > max_pieces:
                 continue
             if metric > metric_max:
