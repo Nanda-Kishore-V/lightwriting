@@ -7,6 +7,8 @@ import operator
 import json
 import yaml
 import matplotlib.pyplot as plt
+import os
+import math
 
 from sets import Set
 from constants_env import (
@@ -149,12 +151,20 @@ def main():
     # exit()
 
     start_trajectories = [(ground, start) for ground, start in zip(ground_positions, start_positions)]
-    print('start_trajectories')
-    print(start_trajectories, sep='\n')
+    # print('start_trajectories')
+    # print(start_trajectories, sep='\n')
 
     start_trajectories.sort(key=lambda x: x[0][3])
-    print('start_trajectories')
-    print(start_trajectories, sep='\n')
+    # print('start_trajectories')
+    # print(start_trajectories, sep='\n')
+
+    # delete all .csv files in traj
+    dir_path = ROS_WS + 'scripts/traj/'
+    for file in os.listdir(dir_path):
+        if file.endswith('.csv'):
+            os.remove(dir_path + file)
+
+    YAW = 0 #math.pi
     for quadcopter_index in range(len(matrix)):
         with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(quadcopter_index + 1), 'w') as filename:
             writer = csv.writer(filename)
@@ -162,17 +172,34 @@ def main():
             x0, y0, z0 = start_trajectories[quadcopter_index][0][:3]
             z0 += HOVER_OFFSET
             dx, dy, dz = (start_trajectories[quadcopter_index][1][:3] - np.array([x0, y0, z0])) / TAKE_OFF_TIME
-            writer.writerow(np.concatenate([[TAKE_OFF_TIME], [x0, dx], [0] * 6, [y0, dy], [0] * 6, [z0, dz], [0] * 14]))
+            writer.writerow(np.concatenate([[TAKE_OFF_TIME], [x0, dx], [0] * 6, [y0, dy], [0] * 6, [z0, dz], [0] * 6, [YAW], [0]*7]))
             curr_segment = matrix[start_trajectories[quadcopter_index][1][3]]
             first_piece = curr_segment[0]
             hover_x = start_trajectories[quadcopter_index][1][0]
             hover_y = first_piece[10]
             hover_z = first_piece[2]
-            writer.writerow(np.concatenate([[HOVER_PAUSE_TIME], [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 15]))
+            writer.writerow(np.concatenate([[HOVER_PAUSE_TIME], [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 7, [YAW], [0] * 7]))
             for piece in curr_segment:
                 piece[18:26] = piece[2:10].copy()
                 piece[2:10] = [0 for _ in range(8)]
-                writer.writerow(np.concatenate([[piece[1]], [(i) for i in piece[2:]]]))
+                piece[26] = YAW
+                writer.writerow(np.concatenate([[piece[1]], [start_trajectories[quadcopter_index][1][0]], [(i) for i in piece[3:-1]]]))
+
+    QUADCOPTER_ID = 5
+    with open(ROS_WS + 'scripts/data/lights.csv', 'w') as filename:
+        writer = csv.writer(filename)
+        writer.writerow(['index', 'time', 'state_change'])
+        for quadcopter_index in range(len(matrix)):
+            writer.writerow([quadcopter_index + QUADCOPTER_ID, 0, 0])
+            curr_time = TAKE_OFF_TIME + HOVER_PAUSE_TIME
+            curr_state = 0 
+            segment = matrix[start_trajectories[quadcopter_index][1][3]]
+            for piece in segment:
+                # print(quadcopter_index, curr_time, curr_state, piece[0], piece[1], piece[-1], sep='\t')
+                if curr_state != piece[-1]:
+                    curr_state = piece[-1]
+                    writer.writerow([quadcopter_index + QUADCOPTER_ID, curr_time, curr_state])
+                curr_time += piece[1]
 
     # exit()
 

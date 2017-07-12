@@ -136,7 +136,7 @@ def form_pairs(
     file_temp = HOME + 'data/temp.csv'
     with open(file_temp, 'w') as f:
         writer = csv.writer(f)
-        writer.writerow(np.concatenate([['Index', 'Duration'], [x + '^' + str(i) for x in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
+        writer.writerow(np.concatenate([['Index', 'Duration'], [x + '^' + str(i) for x in ['x', 'y', 'z', 'yaw'] for i in range(8)], ['lights']]))
         for index_path, p in enumerate(paths):
             for s in p.segments:
                 if s.index is None:
@@ -145,7 +145,7 @@ def form_pairs(
                     x_vel = (x1 - x0) / s.time
                     y_vel = (y1 - y0) / s.time
                     z_vel = (z1 - z0) / s.time
-                    single_row = [index_path, s.time] + [x0, x_vel] + [0] * 6 + [y0, y_vel] + [0] * 6 + [z0, z_vel] + [0] * 14
+                    single_row = [index_path, s.time] + [x0, x_vel] + [0] * 6 + [y0, y_vel] + [0] * 6 + [z0, z_vel] + [0] * 14 + [int(s.state)]
                     writer.writerow(single_row)
                     continue
                 if s.is_reversed:
@@ -175,7 +175,7 @@ def form_pairs(
                         reversed_segment.append(new_piece)
                     matrix[s.index] = reversed_segment[::-1]
                 for line in matrix[s.index]:
-                        writer.writerow(np.concatenate([[index_path], line[1:]]))
+                        writer.writerow(np.concatenate([[index_path], line[1:], [int(s.state)]]))
 
 def main():
     file_ip = HOME + 'data/tangents.csv'

@@ -68,7 +68,7 @@ def main():
         print("Segment {} is being optimized.".format(segment_num))
         points = s.points
         x = np.array([(width - p.coords[0]) / (SCALING_FACTOR * POST_SCALING_FACTOR) + (HEIGHT_OFFSET) for p in points])
-        y = np.array([(p.coords[1] - (height/2)) / (SCALING_FACTOR * POST_SCALING_FACTOR) for p in points])
+        y = np.array([-1*(p.coords[1] - (height/2)) / (SCALING_FACTOR * POST_SCALING_FACTOR) for p in points])
 
         t = np.linspace(0, TIME_PER_SEGMENT, len(points))
         p = np.polyfit(t, zip(x, y), 7)

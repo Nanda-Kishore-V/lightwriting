@@ -360,26 +360,21 @@ class Path(GeometricEntity):
         Return Path formed by joining Paths p and q
         at joining Points a and b of p and q respectively
         '''
+        p_copy = deepcopy(p)
         if a is p.segments[0].points[0]:
-            print('reversed first path')
-            print('original path: ', p)
-            p = deepcopy(p)
-            p.reverse()
-            print('reversed path: ', p)
+            p_copy.reverse()
+
+        q_copy = deepcopy(q)
         if b is q.segments[-1].points[-1]:
-            print('reversed second path')
-            print('original path: ', q)
-            q = deepcopy(q)
-            q.reverse()
-            print('reversed path: ', q)
+            q_copy.reverse()
 
         distance = Point.distance(a, b)
-	time = distance / velocity
-	segments_combined = p.segments
+        time = distance / velocity
+        segments_combined = p_copy.segments
         segments_combined += [Segment([a, a], False, pause_time, is_reversed=None)]
         segments_combined += [Segment([a, b], False, time, is_reversed=None)]
         segments_combined += [Segment([b, b], False, pause_time, is_reversed=None)]
-        segments_combined += q.segments
+        segments_combined += q_copy.segments
         return Path(segments_combined)
 
     def reverse(self):
