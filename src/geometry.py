@@ -355,7 +355,7 @@ class Path(GeometricEntity):
         return sum(len(s.points) - 1 for s in self.segments)
 
     @staticmethod
-    def join(p, q, a, b, velocity=None, pause_time=0):
+    def join(p, q, a, b, velocity=None, pause_time=0, min_gap_time=0):
         '''
         Return Path formed by joining Paths p and q
         at joining Points a and b of p and q respectively
@@ -371,9 +371,10 @@ class Path(GeometricEntity):
         distance = Point.distance(a, b)
         time = distance / velocity
         segments_combined = p_copy.segments
-        segments_combined += [Segment([a, a], False, pause_time, is_reversed=None)]
-        segments_combined += [Segment([a, b], False, time, is_reversed=None)]
-        segments_combined += [Segment([b, b], False, pause_time, is_reversed=None)]
+        state = True if time < min_gap_time else False
+        segments_combined += [Segment([a, a], state, pause_time, is_reversed=None)]
+        segments_combined += [Segment([a, b], state, time, is_reversed=None)]
+        segments_combined += [Segment([b, b], state, pause_time, is_reversed=None)]
         segments_combined += q_copy.segments
         return Path(segments_combined)
 

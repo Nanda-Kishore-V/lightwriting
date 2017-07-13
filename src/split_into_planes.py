@@ -126,12 +126,20 @@ def main():
     if VERBOSE_TEXT: print(color_of_segments)
     print("Number of planes: {}".format(max(color_of_segments.values())+1))
 
-    ground_positions = []
-    with open(HOME + 'data/ground_positions.yaml') as filename:
-        crazyflies = yaml.load(filename)['crazyflies']
+    with open(HOME + 'data/all49.yaml') as infile:
+        crazyflies = yaml.load(infile)['crazyflies']
+    available_ids = np.loadtxt(HOME + 'data/quads_list.txt', delimiter=' ')
+    ids = available_ids[:len(matrix)]
+    print(ids)
+    selected_crazyflies = map(lambda x: crazyflies[int(x) - 1], ids)
+    
+    with open(ROS_WS + 'launch/crazyflies.yaml', 'w') as outfile:
+        yaml.dump({'crazyflies': selected_crazyflies}, outfile)
 
+    ground_positions = []
     for cf in crazyflies:
-        ground_positions.append(np.concatenate([cf['initialPosition'], [cf['id']]]))
+        if cf['id'] in ids:
+            ground_positions.append(np.concatenate([cf['initialPosition'], [cf['id']]]))
     # print("Start Positions before sorting:")
     # print(ground_positions)
 
@@ -148,7 +156,6 @@ def main():
     start_positions.sort(key=tuple)
     # print("Start Positions after sorting:")
     # print(start_positions)
-    # exit()
 
     start_trajectories = [(ground, start) for ground, start in zip(ground_positions, start_positions)]
     # print('start_trajectories')
@@ -166,7 +173,7 @@ def main():
 
     YAW = 0 #math.pi
     for quadcopter_index in range(len(matrix)):
-        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(quadcopter_index + 1), 'w') as filename:
+        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(int(start_trajectories[quadcopter_index][0][3])), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
             x0, y0, z0 = start_trajectories[quadcopter_index][0][:3]
@@ -185,12 +192,11 @@ def main():
                 piece[26] = YAW
                 writer.writerow(np.concatenate([[piece[1]], [start_trajectories[quadcopter_index][1][0]], [(i) for i in piece[3:-1]]]))
 
-    QUADCOPTER_ID = 5
     with open(ROS_WS + 'scripts/data/lights.csv', 'w') as filename:
         writer = csv.writer(filename)
         writer.writerow(['index', 'time', 'state_change'])
         for quadcopter_index in range(len(matrix)):
-            writer.writerow([quadcopter_index + QUADCOPTER_ID, 0, 0])
+            writer.writerow([start_trajectories[quadcopter_index][0][3], 0, 0])
             curr_time = TAKE_OFF_TIME + HOVER_PAUSE_TIME
             curr_state = 0 
             segment = matrix[start_trajectories[quadcopter_index][1][3]]
@@ -198,27 +204,8 @@ def main():
                 # print(quadcopter_index, curr_time, curr_state, piece[0], piece[1], piece[-1], sep='\t')
                 if curr_state != piece[-1]:
                     curr_state = piece[-1]
-                    writer.writerow([quadcopter_index + QUADCOPTER_ID, curr_time, curr_state])
+                    writer.writerow([start_trajectories[quadcopter_index][0][3], curr_time, curr_state])
                 curr_time += piece[1]
-
-    # exit()
-
-    # for segment_num, segment in enumerate(matrix):
-    #     # with open(ROS_WS + 'scripts/traj/plane{0}_quad{1}.csv'.format(color_of_segments[segment_num], segment_num), "w") as filename:
-    #     with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(segment_num + 1), 'w') as filename:
-    #         writer = csv.writer(filename)
-    #         writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
-    #         initialPositions.append((color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], 0))
-    #         heights.append(segment[0][2])
-    #         for piece in segment:
-    #             # temp = piece[10:18].copy()
-    #             piece[18:26] = piece[2:10].copy()
-    #             # piece[10:18] = temp
-    #             piece[2:10] = [0 for _ in range(8)]
-    #             writer.writerow(np.concatenate([[piece[1]], [(i) for i in piece[2:]]]))
-
-    # if VERBOSE_TEXT: print("InitialPositions: " + str(initialPositions))
-    # if VERBOSE_TEXT: print("Heights: " + str(heights))
 
     # channel = [100, 110, 120]
     # with open(ROS_WS + "launch/crazyflies.yaml", "w") as filename:
@@ -227,10 +214,6 @@ def main():
     #         filename.write(' - id: ' + str(segment_num + 1) + '\n')
     #         filename.write('   channel: {0}\n'.format(channel[segment_num%3]))
     #         filename.write('   initialPosition: [{0}, {1}, {2}]\n'.format(*initialPositions[segment_num]))
-
-    # with open(ROS_WS + "launch/heights.yaml", "w") as filename:
-    #     for segment_num in range(len(matrix)):
-    #         filename.write('{0}: {1}\n'.format(segment_num + 1, heights[segment_num]))
 
 if __name__ == "__main__":
     main()
