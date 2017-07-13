@@ -1,5 +1,4 @@
 1) Use homogeneous coordinates after position of camera is known.
 2) Unify the arena constants (3000px by 750px) present in run.sh and src/constants.py
 3) Write a README with instructions to install dependencies
-5) We added vicon_sdk to our bitbucket repo. Remove this before uploading to public
-6) Learn to use the camera
+6) Optimize landing

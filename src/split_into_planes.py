@@ -31,17 +31,6 @@ from geometry import (
     Point,
 )
 
-
-
-def second_largest(numbers):
-    first, second = None, None
-    for n in numbers:
-        if n > first:
-            first, second = n, first
-        elif first > n > second:
-            second = n
-    return second
-
 def distance(point1, point2):
     return np.linalg.norm(map(operator.sub, point2, point1))
 
@@ -171,11 +160,14 @@ def main():
         if file.endswith('.csv'):
             os.remove(dir_path + file)
 
+
+    end_positions = {}
     YAW = 0 #math.pi
     for quadcopter_index in range(len(matrix)):
         with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(int(start_trajectories[quadcopter_index][0][3])), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
+            duration_of_segment = 0
             x0, y0, z0 = start_trajectories[quadcopter_index][0][:3]
             z0 += HOVER_OFFSET
             dx, dy, dz = (start_trajectories[quadcopter_index][1][:3] - np.array([x0, y0, z0])) / TAKE_OFF_TIME
@@ -190,8 +182,16 @@ def main():
                 piece[18:26] = piece[2:10].copy()
                 piece[2:10] = [0 for _ in range(8)]
                 piece[26] = YAW
-                writer.writerow(np.concatenate([[piece[1]], [start_trajectories[quadcopter_index][1][0]], [(i) for i in piece[3:-1]]]))
+                writer.writerow(np.concatenate([[piece[1]], [hover_x], [(i) for i in piece[3:-1]]]))
+                duration_of_segment += piece[1]
+            end_x = start_trajectories[quadcopter_index][1][0]
+            end_y = np.poly1d(piece[10:18][::-1])(piece[1])
+            end_z = np.poly1d(piece[18:26][::-1])(piece[1])
+            end_positions[int(start_trajectories[quadcopter_index][0][3])] = [end_x, end_y, end_z]
+            writer.writerow(np.concatenate([[limit - duration_of_segment], [hover_x], [0] * 7, \
+             [end_y], [0] * 7, [end_z], [0] * 15]))
 
+    print(end_positions)
     with open(ROS_WS + 'scripts/data/lights.csv', 'w') as filename:
         writer = csv.writer(filename)
         writer.writerow(['index', 'time', 'state_change'])
