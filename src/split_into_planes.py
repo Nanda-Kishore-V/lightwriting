@@ -160,8 +160,6 @@ def main():
             taken_ground_positions.append(potential_trajectory[1])
             taken_start_positions.append(potential_trajectory[2])
     start_trajectory_times = [distance(g[:3], s[:3]) / MAX_QUADROTOR_VELOCITY for (g, s) in start_trajectories]
-    print('start trajectory times')
-    print(*start_trajectory_times, sep='\n')
     max_start_trajectory_times = max(start_trajectory_times)
     
     # take 1 - failed
@@ -185,7 +183,11 @@ def main():
     # print(start_trajectories, sep='\n')
 
     print(*start_trajectories, sep='\n')
-    start_trajectories.sort(key=lambda x: x[0][3])
+    start_trajectories, start_trajectory_times = zip(*sorted(zip(start_trajectories, start_trajectory_times), key=lambda x: x[0][0][3]))
+    print('times and trajectories')
+    print(*zip(start_trajectory_times, [(distance(g[:3], s[:3])) for (g,s) in start_trajectories]), sep='\n')
+    print('start trajectory times')
+    print(*start_trajectory_times, sep='\n')
     # print('start_trajectories')
     # print(start_trajectories, sep='\n')
 
