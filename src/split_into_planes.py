@@ -25,6 +25,7 @@ from constants_crazyswarm import (
     CAMERA_DISTANCE,
     HOVER_PAUSE_TIME,
     TAKE_OFF_TIME,
+    MAX_QUADROTOR_VELOCITY,
 )
 from geometry import (
     Segment,
@@ -158,7 +159,11 @@ def main():
             start_trajectories.append(potential_trajectory[1:])
             taken_ground_positions.append(potential_trajectory[1])
             taken_start_positions.append(potential_trajectory[2])
-
+    start_trajectory_times = [distance(g[:3], s[:3]) / MAX_QUADROTOR_VELOCITY for (g, s) in start_trajectories]
+    print('start trajectory times')
+    print(*start_trajectory_times, sep='\n')
+    max_start_trajectory_times = max(start_trajectory_times)
+    
     # take 1 - failed
     # start_positions_copy = start_positions[:]
     # start_trajectories = []
@@ -200,14 +205,16 @@ def main():
             duration_of_segment = 0
             x0, y0, z0 = start_trajectories[quadcopter_index][0][:3]
             z0 += HOVER_OFFSET
-            dx, dy, dz = (start_trajectories[quadcopter_index][1][:3] - np.array([x0, y0, z0])) / TAKE_OFF_TIME
-            writer.writerow(np.concatenate([[TAKE_OFF_TIME], [x0, dx], [0] * 6, [y0, dy], [0] * 6, [z0, dz], [0] * 6, [YAW], [0]*7]))
+            dx, dy, dz = (start_trajectories[quadcopter_index][1][:3] - np.array([x0, y0, z0])) / start_trajectory_times[quadcopter_index]
+            writer.writerow(np.concatenate([[start_trajectory_times[quadcopter_index]], [x0, dx], [0] * 6, \
+             [y0, dy], [0] * 6, [z0, dz], [0] * 6, [YAW], [0]*7]))
             curr_segment = matrix[start_trajectories[quadcopter_index][1][3]]
             first_piece = curr_segment[0]
             hover_x = start_trajectories[quadcopter_index][1][0]
             hover_y = first_piece[10]
             hover_z = first_piece[2]
-            writer.writerow(np.concatenate([[HOVER_PAUSE_TIME], [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 7, [YAW], [0] * 7]))
+            writer.writerow(np.concatenate([[HOVER_PAUSE_TIME + max_start_trajectory_times - start_trajectory_times[quadcopter_index]], \
+             [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 7, [YAW], [0] * 7]))
             for piece in curr_segment:
                 piece[18:26] = piece[2:10].copy()
                 piece[2:10] = [0 for _ in range(8)]
