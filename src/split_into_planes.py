@@ -128,7 +128,7 @@ def main():
     ground_positions = []
     for cf in crazyflies:
         if cf['id'] in ids:
-            ground_positions.append(np.concatenate([cf['initialPosition'], [cf['id']]]))
+            ground_positions.append(tuple(np.concatenate([cf['initialPosition'], [cf['id']]])))
     # print("Start Positions before sorting:")
     # print(ground_positions)
 
@@ -138,7 +138,7 @@ def main():
 
     start_positions = []
     for segment_num, segment in enumerate(matrix):
-        start_positions.append([color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], segment[0][2], segment_num])
+        start_positions.append(tuple([color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], segment[0][2], segment_num]))
     # print("Start Positions before sorting:")
     # print(start_positions)
 
@@ -146,10 +146,40 @@ def main():
     # print("Start Positions after sorting:")
     # print(start_positions)
 
-    start_trajectories = [(ground, start) for ground, start in zip(ground_positions, start_positions)]
+    # take 2
+    start_trajectory_distances = [(distance(g[:3], s[:3]), g, s) for g in ground_positions for s in start_positions]
+    start_trajectory_distances.sort()
+    start_trajectories = []
+    taken_ground_positions = []
+    taken_start_positions = []
+    while(start_trajectory_distances):
+        potential_trajectory = start_trajectory_distances.pop(0)
+        if potential_trajectory[1] not in taken_ground_positions and potential_trajectory[2] not in taken_start_positions:
+            start_trajectories.append(potential_trajectory[1:])
+            taken_ground_positions.append(potential_trajectory[1])
+            taken_start_positions.append(potential_trajectory[2])
+
+    # take 1 - failed
+    # start_positions_copy = start_positions[:]
+    # start_trajectories = []
+    # for ground_position in ground_positions:
+    #     start_position_best = None
+    #     distance_shortest = float('inf')
+    #     for start_position in start_positions_copy:
+    #         distance_curr = distance(ground_position[:3], start_position[:3])
+    #         if distance_curr < distance_shortest:
+    #             distance_shortest = distance_curr
+    #             start_position_best = start_position
+    #     start_trajectories.append((ground_position, start_position))
+    #     start_positions_copy.remove(start_position)
+
+    # original
+    # start_trajectories = [(ground, start) for ground, start in zip(ground_positions, start_positions)]
+
     # print('start_trajectories')
     # print(start_trajectories, sep='\n')
 
+    print(*start_trajectories, sep='\n')
     start_trajectories.sort(key=lambda x: x[0][3])
     # print('start_trajectories')
     # print(start_trajectories, sep='\n')
