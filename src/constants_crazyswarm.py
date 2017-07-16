@@ -8,6 +8,7 @@ del offset_list
 
 SIZE_OF_QUAD = 0.1 # in m
 MAX_QUADROTOR_VELOCITY = 0.2 # in m/s
+MAX_TAKEOFF_VELOCITY = 0.4 # in m/s
 MAX_PIECEWISE_POLYNOMIALS = 30
 CAMERA_EXPOSURE_TIME_LIMIT = 20 # in s
 #Distance of camera from the first plane
@@ -34,5 +35,5 @@ FINAL_HEIGHT = ARENA_HEIGHT * TOTAL_SCALING_FACTOR # in pixel
 
 TIME_PER_SEGMENT = 20.0 # in s
 TAKE_OFF_TIME = 5 # in s
-HOVER_PAUSE_TIME = 1.0 # in s
+HOVER_PAUSE_TIME = 3.0 # in s
 MIN_GAP_TIME = 0.4 # in s

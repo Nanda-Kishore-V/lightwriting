@@ -18,6 +18,7 @@ from constants_crazyswarm import (
     MAX_QUADROTOR_VELOCITY,
     CAMERA_EXPOSURE_TIME_LIMIT,
 )
+from debug_cv2 import show_and_destroy
 from geometry import Point, Segment
 
 TIME_PER_SEGMENT = CAMERA_EXPOSURE_TIME_LIMIT
