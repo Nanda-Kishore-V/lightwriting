@@ -9,7 +9,10 @@ import yaml
 import matplotlib.pyplot as plt
 import os
 import math
+import itertools
 
+from matplotlib import pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from sets import Set
 from constants_env import (
     HOME,
@@ -25,6 +28,8 @@ from constants_crazyswarm import (
     CAMERA_DISTANCE,
     HOVER_PAUSE_TIME,
     TAKE_OFF_TIME,
+    MAX_QUADROTOR_VELOCITY,
+    MAX_TAKEOFF_VELOCITY,
 )
 from geometry import (
     Segment,
@@ -128,29 +133,102 @@ def main():
     ground_positions = []
     for cf in crazyflies:
         if cf['id'] in ids:
-            ground_positions.append(np.concatenate([cf['initialPosition'], [cf['id']]]))
+            ground_positions.append(tuple(np.concatenate([cf['initialPosition'], [cf['id']]])))
     # print("Start Positions before sorting:")
     # print(ground_positions)
 
-    ground_positions.sort(key=tuple)
+    ground_positions.sort(key=tuple, reverse=False)
     # print("Start Positions after sorting:")
-    # print(ground_positions)
 
     start_positions = []
     for segment_num, segment in enumerate(matrix):
-        start_positions.append([color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], segment[0][2], segment_num])
+        start_positions.append(tuple([color_of_segments[segment_num]*-1*X_OFFSET, segment[0][10], segment[0][2], segment_num]))
     # print("Start Positions before sorting:")
     # print(start_positions)
 
-    start_positions.sort(key=tuple)
+    start_positions.sort(key=tuple, reverse=False)
+    start_positions_groups = [list(g) for k, g in itertools.groupby(start_positions, lambda x: x[0])]
+    print('start positions groups')
+    print(*start_positions_groups, sep='\n')
     # print("Start Positions after sorting:")
     # print(start_positions)
 
-    start_trajectories = [(ground, start) for ground, start in zip(ground_positions, start_positions)]
+    max_start_trajectory_times = []
+    start_trajectories = []
+    taken_ground_positions = []
+    taken_start_positions = []
+    for wave_number, start_positions_group in enumerate(start_positions_groups):
+        n = len(start_positions_group)
+        ground_positions_group, ground_positions = ground_positions[:n], ground_positions[n:]
+        
+        start_trajectory_distances = [(distance(g[:3], s[:3]), g, s) for g in ground_positions_group for s in start_positions_group]
+        start_trajectory_distances.sort()
+        while(start_trajectory_distances):
+            potential_trajectory = start_trajectory_distances.pop(0)
+            if potential_trajectory[1] not in taken_ground_positions and potential_trajectory[2] not in taken_start_positions:
+                start_trajectories.append(tuple([wave_number] + list(potential_trajectory[1:])))
+                taken_ground_positions.append(potential_trajectory[1])
+                taken_start_positions.append(potential_trajectory[2])
+        start_trajectory_times = [distance(g[:3], s[:3]) / MAX_TAKEOFF_VELOCITY for (_, g, s) in start_trajectories]
+        max_start_trajectory_times.append(max(start_trajectory_times))
+
+    print('start trajectories')
+    print(*start_trajectories, sep='\n')
+    start_trajectory_groups = [list(g) for k, g in itertools.groupby(start_trajectories, lambda x: x[0])]
+    print('start trajectory groups')
+    print(*start_trajectory_groups, sep='\n')
+    for group in start_trajectory_groups:
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        for trajectory in group:
+            # print(zip(trajectory[1][0][:3], trajectory[1][1][:3]))
+            ax.plot(*zip(trajectory[1][:3], trajectory[2][:3]))
+        plt.show()
+
+    # take 3
+
+
+    # take 2 - we found sometihing better than this
+    # start_trajectory_distances = [(distance(g[:3], s[:3]), g, s) for g in ground_positions for s in start_positions]
+    # start_trajectory_distances.sort()
+    # start_trajectories = []
+    # taken_ground_positions = []
+    # taken_start_positions = []
+    # while(start_trajectory_distances):
+    #     potential_trajectory = start_trajectory_distances.pop(0)
+    #     if potential_trajectory[1] not in taken_ground_positions and potential_trajectory[2] not in taken_start_positions:
+    #         start_trajectories.append(potential_trajectory[1:])
+    #         taken_ground_positions.append(potential_trajectory[1])
+    #         taken_start_positions.append(potential_trajectory[2])
+    # start_trajectory_times = [distance(g[:3], s[:3]) / MAX_QUADROTOR_VELOCITY for (g, s) in start_trajectories]
+    # max_start_trajectory_times = max(start_trajectory_times)
+    
+    # take 1 - failed
+    # start_positions_copy = start_positions[:]
+    # start_trajectories = []
+    # for ground_position in ground_positions:
+    #     start_position_best = None
+    #     distance_shortest = float('inf')
+    #     for start_position in start_positions_copy:
+    #         distance_curr = distance(ground_position[:3], start_position[:3])
+    #         if distance_curr < distance_shortest:
+    #             distance_shortest = distance_curr
+    #             start_position_best = start_position
+    #     start_trajectories.append((ground_position, start_position))
+    #     start_positions_copy.remove(start_position)
+
+    # original
+    # start_trajectories = [(ground, start) for ground, start in zip(ground_positions, start_positions)]
+
     # print('start_trajectories')
     # print(start_trajectories, sep='\n')
 
-    start_trajectories.sort(key=lambda x: x[0][3])
+    # print(*start_trajectories, sep='\n')
+    # start_trajectories, start_trajectory_times = zip(*sorted(zip(start_trajectories, start_trajectory_times), key=lambda x: x[0][0][3]))
+    # print('times and trajectories')
+    # print(*zip(start_trajectory_times, [(distance(g[:3], s[:3])) for (g,s) in start_trajectories]), sep='\n')
+    # print('start trajectory times')
+    # print(*start_trajectory_times, sep='\n')
     # print('start_trajectories')
     # print(start_trajectories, sep='\n')
 
@@ -160,51 +238,66 @@ def main():
         if file.endswith('.csv'):
             os.remove(dir_path + file)
 
-
+    wait_times_before = [sum(max_start_trajectory_times[:i]) for i in range(len(max_start_trajectory_times))]
+    wait_times_after = [sum(max_start_trajectory_times[i + 1:]) for i in range(len(max_start_trajectory_times))]
     end_positions = {}
-    YAW = 0 #math.pi
-    for quadcopter_index in range(len(matrix)):
-        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(int(start_trajectories[quadcopter_index][0][3])), 'w') as filename:
+    YAW = math.pi
+    YAW_TIME = 5.0
+    for segment_index in range(len(matrix)):
+        quadcopter_index = int(start_trajectories[segment_index][1][3])
+        curr_trajectory = start_trajectories[segment_index]
+        wave_number, curr_ground_position, curr_start_position = curr_trajectory
+        with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(quadcopter_index), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
             duration_of_segment = 0
-            x0, y0, z0 = start_trajectories[quadcopter_index][0][:3]
+            x0, y0, z0 = curr_ground_position[:3]
             z0 += HOVER_OFFSET
-            dx, dy, dz = (start_trajectories[quadcopter_index][1][:3] - np.array([x0, y0, z0])) / TAKE_OFF_TIME
-            writer.writerow(np.concatenate([[TAKE_OFF_TIME], [x0, dx], [0] * 6, [y0, dy], [0] * 6, [z0, dz], [0] * 6, [YAW], [0]*7]))
-            curr_segment = matrix[start_trajectories[quadcopter_index][1][3]]
+            writer.writerow(np.concatenate([[YAW_TIME, x0], [0] * 7, [y0], [0] * 7, [z0], [0] * 8, [YAW/YAW_TIME], [0] * 6]))
+            duration_of_wait = wait_times_before[wave_number]
+            writer.writerow(np.concatenate([[duration_of_wait], [x0], [0] * 7, [y0], [0] * 7, [z0], [0] * 7, [YAW], [0] * 7]))
+            dx, dy, dz = (np.array(curr_start_position[:3]) - np.array([x0, y0, z0])) / start_trajectory_times[segment_index]
+            writer.writerow(np.concatenate([[start_trajectory_times[segment_index]], [x0, dx], [0] * 6, \
+             [y0, dy], [0] * 6, [z0, dz], [0] * 6, [YAW], [0]*7]))
+            curr_segment = matrix[curr_start_position[3]]
             first_piece = curr_segment[0]
-            hover_x = start_trajectories[quadcopter_index][1][0]
+            hover_x = curr_start_position[0]
             hover_y = first_piece[10]
             hover_z = first_piece[2]
-            writer.writerow(np.concatenate([[HOVER_PAUSE_TIME], [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 7, [YAW], [0] * 7]))
+            duration_of_wait = wait_times_after[wave_number] + max_start_trajectory_times[wave_number] - start_trajectory_times[segment_index]
+            writer.writerow(np.concatenate([[duration_of_wait], [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 7, [YAW], [0] * 7]))
             for piece in curr_segment:
                 piece[18:26] = piece[2:10].copy()
                 piece[2:10] = [0 for _ in range(8)]
                 piece[26] = YAW
                 writer.writerow(np.concatenate([[piece[1]], [hover_x], [(i) for i in piece[3:-1]]]))
                 duration_of_segment += piece[1]
-            end_x = start_trajectories[quadcopter_index][1][0]
+            end_x = curr_start_position[0]
             end_y = np.poly1d(piece[10:18][::-1])(piece[1])
             end_z = np.poly1d(piece[18:26][::-1])(piece[1])
-            end_positions[int(start_trajectories[quadcopter_index][0][3])] = [end_x, end_y, end_z]
+            end_positions[quadcopter_index] = [end_x, end_y, end_z]
             writer.writerow(np.concatenate([[limit - duration_of_segment], [hover_x], [0] * 7, \
-             [end_y], [0] * 7, [end_z], [0] * 15]))
+             [end_y], [0] * 7, [end_z], [0] * 7, [YAW], [0] * 7]))
 
     print(end_positions)
     with open(ROS_WS + 'scripts/data/lights.csv', 'w') as filename:
         writer = csv.writer(filename)
         writer.writerow(['index', 'time', 'state_change'])
-        for quadcopter_index in range(len(matrix)):
-            writer.writerow([start_trajectories[quadcopter_index][0][3], 0, 0])
-            curr_time = TAKE_OFF_TIME + HOVER_PAUSE_TIME
+        time_origin = wait_times_before[wave_number] + wait_times_after[wave_number] + max_start_trajectory_times[wave_number] + YAW_TIME
+        print('origin', time_origin)
+        for segment_index in range(len(matrix)):
+            quadcopter_index = int(start_trajectories[segment_index][1][3])
+            curr_trajectory = start_trajectories[segment_index]
+            wave_number, curr_ground_position, curr_start_position = curr_trajectory
+            writer.writerow([curr_ground_position[3], 0, 0])
+            curr_time = time_origin
             curr_state = 0 
-            segment = matrix[start_trajectories[quadcopter_index][1][3]]
+            segment = matrix[curr_start_position[3]]
             for piece in segment:
-                # print(quadcopter_index, curr_time, curr_state, piece[0], piece[1], piece[-1], sep='\t')
+                # print(segment_index, curr_time, curr_state, piece[0], piece[1], piece[-1], sep='\t')
                 if curr_state != piece[-1]:
                     curr_state = piece[-1]
-                    writer.writerow([start_trajectories[quadcopter_index][0][3], curr_time, curr_state])
+                    writer.writerow([curr_ground_position[3], curr_time, curr_state])
                 curr_time += piece[1]
 
     # channel = [100, 110, 120]

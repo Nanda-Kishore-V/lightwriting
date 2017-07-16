@@ -2,8 +2,8 @@ SRC_DIR=src
 SCRIPT_DIR=shell_scripts
 DATA_DIR=data
 
-TEXT=NITT
-FONT=Ubuntu
+TEXT=S
+FONT=Calligraffiti
 
 .PHONY: all
 all:
