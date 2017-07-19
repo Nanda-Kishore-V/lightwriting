@@ -241,8 +241,8 @@ def main():
     wait_times_before = [sum(max_start_trajectory_times[:i]) for i in range(len(max_start_trajectory_times))]
     wait_times_after = [sum(max_start_trajectory_times[i + 1:]) for i in range(len(max_start_trajectory_times))]
     end_positions = {}
-    YAW = math.pi
-    YAW_TIME = 5.0
+    YAW = 0
+    YAW_TIME = 0.0
     for segment_index in range(len(matrix)):
         quadcopter_index = int(start_trajectories[segment_index][1][3])
         curr_trajectory = start_trajectories[segment_index]
@@ -253,7 +253,7 @@ def main():
             duration_of_segment = 0
             x0, y0, z0 = curr_ground_position[:3]
             z0 += HOVER_OFFSET
-            writer.writerow(np.concatenate([[YAW_TIME, x0], [0] * 7, [y0], [0] * 7, [z0], [0] * 8, [YAW/YAW_TIME], [0] * 6]))
+            # writer.writerow(np.concatenate([[YAW_TIME, x0], [0] * 7, [y0], [0] * 7, [z0], [0] * 8, [YAW/YAW_TIME], [0] * 6]))
             duration_of_wait = wait_times_before[wave_number]
             writer.writerow(np.concatenate([[duration_of_wait], [x0], [0] * 7, [y0], [0] * 7, [z0], [0] * 7, [YAW], [0] * 7]))
             dx, dy, dz = (np.array(curr_start_position[:3]) - np.array([x0, y0, z0])) / start_trajectory_times[segment_index]

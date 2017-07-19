@@ -7,12 +7,12 @@ DIRECTIONS.remove((0,0))
 del offset_list
 
 SIZE_OF_QUAD = 0.1 # in m
-MAX_QUADROTOR_VELOCITY = 0.2 # in m/s
-MAX_TAKEOFF_VELOCITY = 0.4 # in m/s
+MAX_QUADROTOR_VELOCITY = 0.3 #0.2 # in m/s
+MAX_TAKEOFF_VELOCITY = 0.3 # in m/s
 MAX_PIECEWISE_POLYNOMIALS = 30
-CAMERA_EXPOSURE_TIME_LIMIT = 20 # in s
+CAMERA_EXPOSURE_TIME_LIMIT = 28 #20 # in s
 #Distance of camera from the first plane
-CAMERA_DISTANCE = 1 # in m
+CAMERA_DISTANCE = 7.7 # in m
 CAMERA_Y = 2.5 # in m
 CAMERA_Z = 3 # in m
 
