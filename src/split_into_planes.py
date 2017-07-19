@@ -126,7 +126,7 @@ def main():
     ids = available_ids[:len(matrix)]
     print(ids)
     selected_crazyflies = map(lambda x: crazyflies[int(x) - 1], ids)
-    
+
     with open(ROS_WS + 'launch/crazyflies.yaml', 'w') as outfile:
         yaml.dump({'crazyflies': selected_crazyflies}, outfile)
 
@@ -160,7 +160,7 @@ def main():
     for wave_number, start_positions_group in enumerate(start_positions_groups):
         n = len(start_positions_group)
         ground_positions_group, ground_positions = ground_positions[:n], ground_positions[n:]
-        
+
         start_trajectory_distances = [(distance(g[:3], s[:3]), g, s) for g in ground_positions_group for s in start_positions_group]
         start_trajectory_distances.sort()
         while(start_trajectory_distances):
@@ -202,7 +202,7 @@ def main():
     #         taken_start_positions.append(potential_trajectory[2])
     # start_trajectory_times = [distance(g[:3], s[:3]) / MAX_QUADROTOR_VELOCITY for (g, s) in start_trajectories]
     # max_start_trajectory_times = max(start_trajectory_times)
-    
+
     # take 1 - failed
     # start_positions_copy = start_positions[:]
     # start_trajectories = []
@@ -247,6 +247,10 @@ def main():
         quadcopter_index = int(start_trajectories[segment_index][1][3])
         curr_trajectory = start_trajectories[segment_index]
         wave_number, curr_ground_position, curr_start_position = curr_trajectory
+        curr_start_position = (curr_start_position[0],
+                               curr_start_position[1]*(CAMERA_DISTANCE + curr_start_position[0]) / CAMERA_DISTANCE,
+                               curr_start_position[2]*(CAMERA_DISTANCE + curr_start_position[0]) / CAMERA_DISTANCE,
+                               curr_start_position[3])
         with open(ROS_WS + 'scripts/traj/trajectory{0}.csv'.format(quadcopter_index), 'w') as filename:
             writer = csv.writer(filename)
             writer.writerow(np.concatenate([['duration'],[axis + '^' + str(i) for axis in ['x', 'y', 'z', 'yaw'] for i in range(8)]]))
@@ -262,15 +266,15 @@ def main():
             curr_segment = matrix[curr_start_position[3]]
             first_piece = curr_segment[0]
             hover_x = curr_start_position[0]
-            hover_y = first_piece[10]
-            hover_z = first_piece[2]
+            hover_y = first_piece[10] * (CAMERA_DISTANCE + curr_start_position[0]) / CAMERA_DISTANCE
+            hover_z = first_piece[2] * (CAMERA_DISTANCE + curr_start_position[0]) / CAMERA_DISTANCE
             duration_of_wait = wait_times_after[wave_number] + max_start_trajectory_times[wave_number] - start_trajectory_times[segment_index]
             writer.writerow(np.concatenate([[duration_of_wait], [hover_x], [0] * 7, [hover_y], [0] * 7, [hover_z], [0] * 7, [YAW], [0] * 7]))
             for piece in curr_segment:
                 piece[18:26] = piece[2:10].copy()
                 piece[2:10] = [0 for _ in range(8)]
                 piece[26] = YAW
-                writer.writerow(np.concatenate([[piece[1]], [hover_x], [(i) for i in piece[3:-1]]]))
+                writer.writerow(np.concatenate([[piece[1]], [hover_x], [(i*(CAMERA_DISTANCE + curr_start_position[0]) / CAMERA_DISTANCE) for i in piece[3:-1]]]))
                 duration_of_segment += piece[1]
             end_x = curr_start_position[0]
             end_y = np.poly1d(piece[10:18][::-1])(piece[1])
@@ -291,7 +295,7 @@ def main():
             wave_number, curr_ground_position, curr_start_position = curr_trajectory
             writer.writerow([curr_ground_position[3], 0, 0])
             curr_time = time_origin
-            curr_state = 0 
+            curr_state = 0
             segment = matrix[curr_start_position[3]]
             for piece in segment:
                 # print(segment_index, curr_time, curr_state, piece[0], piece[1], piece[-1], sep='\t')
