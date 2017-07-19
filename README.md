@@ -33,7 +33,7 @@ sudo pip install PyPolynomial
 sudo pip install pyyaml
 ```
 
-Also install `convert`, a command line utility ny imagemagick to convert text to images.
+Also install `convert`, a command line utility by imagemagick to convert text to images.
 
 ### Usage
 
