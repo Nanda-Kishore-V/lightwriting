@@ -14,7 +14,7 @@ Clone this repository in the same folder as crazyswarm.
 └── crazyswarm
 
 Create two folders named `traj` and `data` in `./crazyswarm/ros_ws/src/crazyswarm/scripts/`.
-Read the modified [crazyswarm repository] for further details.(https://bitbucket.org/nanda-kishore-v/crazyswarm)
+Read the modified [crazyswarm repository](https://bitbucket.org/nanda-kishore-v/crazyswarm) for further details.
 
 ### Dependencies
 
