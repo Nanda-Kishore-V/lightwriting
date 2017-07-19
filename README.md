@@ -8,7 +8,9 @@ given text in the given font.
 Clone this repository in the same folder as crazyswarm.
 
 .
+
 ├── lightwriting
+
 └── crazyswarm
 
 Create two folders named `traj` and `data` in `./crazyswarm/ros_ws/src/crazyswarm/scripts/`.
